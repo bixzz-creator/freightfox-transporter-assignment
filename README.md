@@ -10,7 +10,7 @@
 
 A high-performance, deterministic logistics optimization microservice built for **FreightFox**. The service solves the multi-lane transporter procurement problem using **Bitmask Dynamic Programming (DP)**, optimizing lane allocations against a **strict lexicographic objective**: maximizing transporter diversity across network lanes up to a business quota, followed by minimizing total freight expenditure, backed by deterministic tie-breaking.
 
-Includes an interactive single-page web dashboard with an embedded **Figma Architecture Design Board** on the first page, followed by an automated **CSV Upload and Analytics Tool** supporting both flat and matrix freight rate grids.
+Includes an interactive single-page web dashboard with an automated **CSV Upload and Analytics Tool** supporting both flat and matrix freight rate grids.
 
 ---
 
@@ -20,7 +20,7 @@ Includes an interactive single-page web dashboard with an embedded **Figma Archi
 2. [Optimization Problem & Lexicographic Objective](#optimization-problem--lexicographic-objective)
 3. [Algorithm & Complexity Analysis](#algorithm--complexity-analysis)
 4. [Database Design & Transactional Integrity](#database-design--transactional-integrity)
-5. [Interactive Web Frontend & Figma Integration](#interactive-web-frontend--figma-integration)
+5. [Interactive Web Frontend & CSV Analyzer](#interactive-web-frontend--csv-analyzer)
 6. [API Reference & OpenAPI Documentation](#api-reference--openapi-documentation)
 7. [Testing & Quality Assurance](#testing--quality-assurance)
 8. [Getting Started (Local Execution)](#getting-started-local-execution)
@@ -63,7 +63,7 @@ flowchart TD
 - **`BitmaskDpOptimizer`**: The pure computational core solving the exact optimal assignment problem via rolling-array bitmask dynamic programming.
 - **`TransporterService`**: Coordinates data validation, atomic transactional replacement, quotation matrix assembly, and DTO transformation.
 - **`GlobalExceptionHandler`**: Translates validation constraints, missing resources, and optimization infeasibilities into structured RFC 7807 error envelopes.
-- **Frontend SPA**: Self-contained single-page application (`index.html`) featuring an embedded Figma design canvas, live CSV matrix parser, and real-time interactive solver.
+- **Frontend SPA**: Self-contained single-page application (`index.html`) featuring a live CSV matrix parser, interactive drag-and-drop ingestion, and real-time interactive solver.
 
 ---
 
@@ -163,32 +163,19 @@ The endpoint `POST /api/v1/transporters/input` provides **strict transactional r
 
 ---
 
-## Interactive Web Frontend & Figma Integration
+## Interactive Web Frontend & CSV Analyzer
 
 The application serves a modern, responsive single-page dashboard at `http://localhost:8081/`:
 
-### Page 1: Figma Architecture Design Canvas (Default View)
-Displays the interactive Figma design embedded directly inside the application:
-```html
-<iframe 
-  style="border: 1px solid rgba(0, 0, 0, 0.1);" 
-  width="100%" 
-  height="500" 
-  src="https://embed.figma.com/design/ClARRJGNaoTVwiW5d42xe5/Untitled?node-id=2-42&embed-host=share" 
-  allowfullscreen>
-</iframe>
-```
-Presents system architecture specifications, workflow overviews, and a quick-navigation CTA button to the optimizer.
-
-### Page 2: CSV Data Ingestion & Live Optimizer
 - **Dual CSV Parsing Engine**:
   - **Matrix Grid Format**: Parses datasets formatted as row/column cross-tabs (e.g. `Trade Lane, T1, T2, T3...`), exactly matching standard enterprise freight tenders.
   - **Flat Format**: Parses row-by-row records (`Lane ID, Origin, Destination, Transporter ID/Name, Quote`).
 - **Interactive Controls**:
-  - Live preview of parsed lanes, transporters, and quotations before submission.
+  - Drag-and-drop or file browser upload for instant file reading.
+  - Live preview of parsed lanes, routes, transporters, and quotations before submission.
   - Dynamic `maxTransporters` stepper selector.
   - One-click dataset ingestion (`/api/v1/transporters/input`) and assignment execution (`/api/v1/transporters/assignment`).
-  - Metric summary cards displaying total expenditure, active transporters, and lane coverage.
+  - Metric summary cards displaying total freight expenditure, active transporters utilized, and lane coverage.
   - Color-coded transporter assignment result table.
 
 ---
@@ -333,7 +320,7 @@ java -jar target/transporter-assignment-1.0.0.jar --server.port=8081 --spring.pr
 ```
 
 ### 3. Open in Browser
-- **Application Dashboard (with Figma Embed & CSV Tool)**: [http://localhost:8081/](http://localhost:8081/)
+- **Application Dashboard (CSV Uploader & Optimizer)**: [http://localhost:8081/](http://localhost:8081/)
 - **Swagger UI API Documentation**: [http://localhost:8081/swagger-ui/index.html](http://localhost:8081/swagger-ui/index.html)
 - **Actuator Health Endpoint**: [http://localhost:8081/actuator/health](http://localhost:8081/actuator/health)
 
@@ -410,3 +397,4 @@ A sample matrix freight tender file (`transporter_assignment_data.csv`) containi
 - **Author**: FreightFox Engineering Assessment Candidate
 - **Project**: Transporter Assignment on Lanes
 - **Submission Date**: November 2026
+
