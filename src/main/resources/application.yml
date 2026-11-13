@@ -1,0 +1,71 @@
+# Application Configuration
+spring:
+  application:
+    name: transporter-assignment
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/transporter_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+
+server:
+  port: ${SERVER_PORT:8080}
+
+# Spring Boot Actuator Security & Endpoint Exposure
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
+    ping:
+      enabled: true
+  info:
+    env:
+      enabled: false
+
+# OpenAPI & Swagger UI
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui/index.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+
+# Application-specific
+app:
+  optimizer:
+    max-supported-transporters: 20
+
+logging:
+  level:
+    com.freightfox.transporter: INFO
+    org.hibernate.SQL: WARN

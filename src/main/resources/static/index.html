@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FreightFox - Transporter Assignment on Lanes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --success: #10b981;
+      --success-light: #ecfdf5;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --danger-light: #fef2f2;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
+
+    /* Top Navbar */
+    .navbar {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: #0f172a;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .brand-badge {
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+    }
+    .nav-tabs {
+      display: flex;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 10px;
+      gap: 4px;
+    }
+    .nav-tab-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #64748b;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .nav-tab-btn.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    .nav-links {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-link:hover {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1280px;
+      margin: 28px auto;
+      padding: 0 20px;
+    }
+
+    /* Tab Page Views */
+    .page-view {
+      display: none;
+    }
+    .page-view.active {
+      display: block;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==========================================================================
+       VIEW 1: FIRST PAGE (FIGMA DESIGN EMBED & INTRO)
+       ========================================================================== */
+    .hero-banner {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: #ffffff;
+      border-radius: var(--radius);
+      padding: 32px 36px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-lg);
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .hero-text h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .hero-text p {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      max-width: 680px;
+    }
+    .btn-cta {
+      background: #2563eb;
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      padding: 14px 24px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn-cta:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+    }
+
+    .figma-frame-wrapper {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 24px;
+    }
+    .figma-frame-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .figma-frame-title {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #1e293b;
+    }
+    .figma-badge {
+      background: #fdf2f8;
+      color: #db2777;
+      border: 1px solid #fbcfe8;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .figma-container {
+      width: 100%;
+      height: 600px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000;
+      position: relative;
+    }
+    .figma-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* Key Specs Row */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    @media (max-width: 900px) {
+      .specs-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .spec-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+    .spec-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    .spec-title {
+      font-weight: 700;
+      font-size: 0.9375rem;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+    .spec-desc {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* ==========================================================================
+       VIEW 2: OPTIMIZER & CSV UPLOAD
+       ========================================================================== */
+    .header-section {
+      margin-bottom: 24px;
+    }
+    .header-section h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+    .header-section p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      max-width: 720px;
+    }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .grid-layout { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .drop-zone {
+      border: 2px dashed #cbd5e1;
+      border-radius: var(--radius);
+      padding: 36px 20px;
+      text-align: center;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .drop-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      color: var(--primary);
+    }
+    .drop-zone input[type="file"] {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .drop-text {
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 4px;
+    }
+    .drop-subtext {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    .quick-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .btn-outline {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-outline:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    .form-group {
+      margin-top: 20px;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      font-family: inherit;
+      background: #ffffff;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .btn-primary {
+      width: 100%;
+      margin-top: 20px;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+    .btn-primary:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .file-status {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .file-status.success {
+      background: var(--success-light);
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+    }
+    .file-status.error {
+      background: var(--danger-light);
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+
+    .results-section {
+      display: none;
+      margin-top: 32px;
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 768px) {
+      .metrics-grid { grid-template-columns: 1fr; }
+    }
+    .metric-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .metric-label {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .metric-value {
+      font-size: 1.875rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .metric-value.highlight {
+      color: var(--primary);
+    }
+    .metric-sub {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .transporters-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .badge {
+      background: #f1f5f9;
+      color: #1e293b;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-top: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #ffffff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+    thead {
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      padding: 12px 16px;
+      font-weight: 700;
+      color: #475569;
+      font-size: 0.8125rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      color: #1e293b;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: #f8fafc; }
+    .route-arrow {
+      color: var(--primary);
+      font-weight: 700;
+      margin: 0 4px;
+    }
+    .quote-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: #047857;
+      background: #ecfdf5;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 3px solid white;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar">
+    <div class="brand" onclick="switchTab('design')">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 17h4V5H2v12h4m10 0h4v-7l-3-4h-5v11"/>
+        <circle cx="7.5" cy="17.5" r="2.5"/>
+        <circle cx="17.5" cy="17.5" r="2.5"/>
+      </svg>
+      FreightFox
+      <span class="brand-badge">Bitmask DP v1.0</span>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="nav-tab-btn active" id="tabDesign" onclick="switchTab('design')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+        </svg>
+        Figma Design Overview
+      </button>
+      <button class="nav-tab-btn" id="tabOptimizer" onclick="switchTab('optimizer')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+        CSV Optimizer Tool
+      </button>
+    </nav>
+
+    <div class="nav-links">
+      <a href="/swagger-ui/index.html" target="_blank" class="nav-link">Swagger Docs</a>
+      <a href="/actuator/health" target="_blank" class="nav-link">Health Check</a>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- ====================================================================
+         PAGE 1: FIGMA DESIGN OVERVIEW (FIRST PAGE OF THE PROJECT)
+         ==================================================================== -->
+    <div id="viewDesign" class="page-view active">
+
+      <!-- Hero Callout -->
+      <div class="hero-banner">
+        <div class="hero-text">
+          <h1>Transporter Assignment on Lanes</h1>
+          <p>Interactive Figma Specification & Logistics Optimization Architecture. Built with Spring Boot 3, Java 21, and Bitmask Dynamic Programming.</p>
+        </div>
+        <button class="btn-cta" onclick="switchTab('optimizer')">
+          <span>Open Live CSV Optimizer</span>
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Specs Row -->
+      <div class="specs-grid">
+        <div class="spec-card">
+          <div class="spec-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+          </div>
+          <div class="spec-title">Lexicographic Goal</div>
+          <div class="spec-desc">Maximizes distinct active transporters up to maxTransporters first, then minimizes total cost.</div>
+        </div>
+
+        <div class="spec-card">
+          <div class="spec-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <div class="spec-title">Bitmask DP</div>
+          <div class="spec-desc">O(L × 2^T × T) optimal algorithm with rolling memory arrays and backward path reconstruction.</div>
+        </div>
+
+        <div class="spec-card">
+          <div class="spec-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7C5 4 4 5 4 7z"/>
+            </svg>
+          </div>
+          <div class="spec-title">Atomic Replacement</div>
+          <div class="spec-desc">Full pre-validation and atomic database transactions with rollback on persistence failure.</div>
+        </div>
+
+        <div class="spec-card">
+          <div class="spec-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <div class="spec-title">Smart CSV Ingestion</div>
+          <div class="spec-desc">Direct support for Matrix CSVs (Trade Lane, T1..T7) and standard Flat row-based CSVs.</div>
+        </div>
+      </div>
+
+      <!-- Embedded Figma Design Frame -->
+      <div class="figma-frame-wrapper">
+        <div class="figma-frame-header">
+          <div class="figma-frame-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M5.5 8.5C5.5 6.567 7.067 5 9 5h3v7H9a3.5 3.5 0 01-3.5-3.5z" fill="#0ACF83"/>
+              <path d="M5.5 15.5C5.5 13.567 7.067 12 9 12h3v7H9a3.5 3.5 0 01-3.5-3.5z" fill="#A259FF"/>
+              <path d="M5.5 1.5C5.5.567 7.067 0 9 0h3v5H9A3.5 3.5 0 015.5 1.5z" fill="#F24E1E"/>
+              <path d="M12 0h3a3.5 3.5 0 013.5 3.5C18.5 5.433 16.933 7 15 7h-3V0z" fill="#FF7262"/>
+              <path d="M18.5 8.5a3.5 3.5 0 11-7 0 3.5 3.5 0 017 0z" fill="#1ABCFE"/>
+            </svg>
+            Interactive Figma Design Board
+            <span class="figma-badge">Figma Embed</span>
+          </div>
+          <a href="https://embed.figma.com/design/ClARRJGNaoTVwiW5d42xe5/Untitled?node-id=2-42&embed-host=share" target="_blank" class="btn-outline">
+            Open in Fullscreen ↗
+          </a>
+        </div>
+
+        <div class="figma-container">
+          <iframe 
+            src="https://embed.figma.com/design/ClARRJGNaoTVwiW5d42xe5/Untitled?node-id=2-42&embed-host=share" 
+            allowfullscreen>
+          </iframe>
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div style="text-align: center; margin-top: 28px;">
+        <button class="btn-cta" style="font-size: 1.05rem; padding: 16px 36px;" onclick="switchTab('optimizer')">
+          <span>Launch Live CSV Optimizer & Upload Dataset</span>
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ====================================================================
+         PAGE 2: LIVE CSV OPTIMIZER & RESULTS
+         ==================================================================== -->
+    <div id="viewOptimizer" class="page-view">
+
+      <div class="header-section">
+        <h2>CSV Analysis & Transporter Optimization</h2>
+        <p>Drop your CSV file (Matrix format or Flat format) or load demo data to compute the mathematically optimal transporter assignment.</p>
+      </div>
+
+      <!-- Grid Layout -->
+      <div class="grid-layout">
+
+        <!-- Left Column: Upload Card -->
+        <div class="card">
+          <div class="card-title">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+            </svg>
+            Upload CSV Dataset
+          </div>
+
+          <div class="drop-zone" id="dropZone">
+            <svg class="drop-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+            </svg>
+            <div class="drop-text">Drag and drop your CSV file here</div>
+            <div class="drop-subtext">Supports Matrix format (Trade Lane, T1..T7) and Flat format</div>
+            <input type="file" id="csvFileInput" accept=".csv,text/csv">
+          </div>
+
+          <!-- File Status Message -->
+          <div id="fileStatus" class="file-status"></div>
+
+          <div class="quick-actions">
+            <button type="button" class="btn-outline" id="loadSampleBtn">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+              Load Sample CSV Data
+            </button>
+            <button type="button" class="btn-outline" id="downloadTemplateBtn">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+              </svg>
+              Download CSV Template
+            </button>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="maxTransportersInput">Maximum Transporters Limit (maxTransporters)</label>
+            <input type="number" id="maxTransportersInput" class="form-input" min="1" max="20" value="3">
+            <small style="color: var(--text-muted); font-size: 0.75rem; margin-top: 4px; display: block;">
+              The algorithm maximizes distinct transporters up to this limit before minimizing cost.
+            </small>
+          </div>
+
+          <button type="button" id="optimizeBtn" class="btn-primary" disabled>
+            <span class="spinner" id="spinner"></span>
+            <span id="btnText">Analyze & Optimize Assignment</span>
+          </button>
+        </div>
+
+        <!-- Right Column: Data Preview & Objective Explanation -->
+        <div class="card">
+          <div class="card-title">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Dataset Preview & Objective
+          </div>
+
+          <div id="previewEmptyState" style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+            <svg style="width: 42px; height: 42px; margin-bottom: 12px; color: #cbd5e1;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <p>No CSV file uploaded yet. Drop a CSV or click <b>"Load Sample CSV Data"</b> to see a preview.</p>
+          </div>
+
+          <div id="previewContent" style="display: none;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <span style="font-size: 0.8125rem; font-weight: 600; color: #475569;" id="previewStats">0 Lanes, 0 Transporters</span>
+              <span style="font-size: 0.8125rem; color: var(--success); font-weight: 600;">✓ Ready to optimize</span>
+            </div>
+            <div class="table-container" style="max-height: 280px; overflow-y: auto;">
+              <table id="previewTable">
+                <thead>
+                  <tr>
+                    <th>Lane ID</th>
+                    <th>Route</th>
+                    <th>Transporter</th>
+                    <th>Quote</th>
+                  </tr>
+                </thead>
+                <tbody id="previewTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div style="margin-top: 24px; padding: 14px; background: #f1f5f9; border-radius: 8px; font-size: 0.8125rem;">
+            <strong style="color: #1e293b;">Strict Lexicographic Objective:</strong>
+            <ol style="margin-left: 18px; margin-top: 6px; color: #475569; line-height: 1.6;">
+              <li><b>Maximize Transporters:</b> Uses the highest possible number of distinct transporters (up to maxTransporters).</li>
+              <li><b>Minimize Cost:</b> Among those, chooses the lowest total freight quote.</li>
+              <li><b>Deterministic:</b> Consistent tie-breaking by sorted IDs.</li>
+            </ol>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Results Section (Visible after optimization) -->
+      <div class="results-section card" id="resultsSection">
+        <div class="card-title" style="margin-bottom: 20px;">
+          <svg width="22" height="22" fill="none" stroke="#10b981" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Optimization Results
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-label">Total Transportation Cost</div>
+            <div class="metric-value highlight" id="resultTotalCost">₹0.00</div>
+            <div class="metric-sub">Sum of all optimal quotes</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Transporters Utilized</div>
+            <div class="metric-value" id="resultTransporterCount">0</div>
+            <div class="metric-sub" id="resultMaxTransportersText">Out of 0 max allowed</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Full Lane Coverage</div>
+            <div class="metric-value" id="resultLanesCovered">0 / 0</div>
+            <div class="metric-sub">100% lanes assigned</div>
+          </div>
+        </div>
+
+        <!-- Selected Transporters -->
+        <div style="margin-bottom: 20px;">
+          <div class="form-label">Selected Active Transporters:</div>
+          <div class="transporters-list" id="selectedTransportersBadges"></div>
+        </div>
+
+        <!-- Assignment Detail Table -->
+        <div class="card-title" style="font-size: 1rem; margin-top: 24px;">Lane-by-Lane Assignments:</div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Lane ID</th>
+                <th>Route (Origin → Destination)</th>
+                <th>Assigned Transporter</th>
+                <th>Assigned Quote</th>
+              </tr>
+            </thead>
+            <tbody id="assignmentsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // Tab switching logic
+    function switchTab(tab) {
+      const viewDesign = document.getElementById('viewDesign');
+      const viewOptimizer = document.getElementById('viewOptimizer');
+      const tabDesign = document.getElementById('tabDesign');
+      const tabOptimizer = document.getElementById('tabOptimizer');
+
+      if (tab === 'optimizer') {
+        viewDesign.classList.remove('active');
+        viewOptimizer.classList.add('active');
+        tabDesign.classList.remove('active');
+        tabOptimizer.classList.add('active');
+        window.location.hash = 'optimizer';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        viewOptimizer.classList.remove('active');
+        viewDesign.classList.add('active');
+        tabOptimizer.classList.remove('active');
+        tabDesign.classList.add('active');
+        window.location.hash = 'design';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    // Initialize tab based on URL hash
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.location.hash === '#optimizer') {
+        switchTab('optimizer');
+      } else {
+        switchTab('design');
+      }
+    });
+
+    let parsedDataset = null;
+
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('csvFileInput');
+    const fileStatus = document.getElementById('fileStatus');
+    const optimizeBtn = document.getElementById('optimizeBtn');
+    const spinner = document.getElementById('spinner');
+    const btnText = document.getElementById('btnText');
+    const maxTransportersInput = document.getElementById('maxTransportersInput');
+    const previewEmptyState = document.getElementById('previewEmptyState');
+    const previewContent = document.getElementById('previewContent');
+    const previewTableBody = document.getElementById('previewTableBody');
+    const previewStats = document.getElementById('previewStats');
+    const resultsSection = document.getElementById('resultsSection');
+    const loadSampleBtn = document.getElementById('loadSampleBtn');
+    const downloadTemplateBtn = document.getElementById('downloadTemplateBtn');
+
+    // Drag and Drop listeners
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) {
+        processFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) {
+        processFile(e.target.files[0]);
+      }
+    });
+
+    function processFile(file) {
+      if (!file.name.endsWith('.csv')) {
+        showStatus('Please upload a valid .csv file', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => parseCsvText(e.target.result, file.name);
+      reader.readAsText(file);
+    }
+
+    // Parse CSV Text supporting BOTH Flat format and Matrix/Grid format
+    function parseCsvText(csvText, fileName = 'uploaded.csv') {
+      try {
+        const lines = csvText.trim().split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+        if (lines.length < 2) {
+          showStatus('CSV file is empty or contains only headers.', 'error');
+          return;
+        }
+
+        const rawHeaders = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+        const lowerHeaders = rawHeaders.map(h => h.toLowerCase());
+
+        const isMatrixFormat = (
+          lowerHeaders[0].includes('lane') || lowerHeaders[0].includes('trade') || lowerHeaders[0].includes('route')
+        ) && rawHeaders.length >= 2 && !lowerHeaders.includes('quote') && !lowerHeaders.includes('price');
+
+        if (isMatrixFormat) {
+          parseMatrixCsv(lines, rawHeaders, fileName);
+        } else {
+          parseFlatCsv(lines, rawHeaders, lowerHeaders, fileName);
+        }
+
+      } catch (err) {
+        showStatus('Error parsing CSV: ' + err.message, 'error');
+        optimizeBtn.disabled = true;
+      }
+    }
+
+    const defaultCityPairs = [
+      { origin: "Mumbai", destination: "Delhi" },
+      { origin: "Delhi", destination: "Bangalore" },
+      { origin: "Chennai", destination: "Kolkata" },
+      { origin: "Pune", destination: "Hyderabad" },
+      { origin: "Ahmedabad", destination: "Jaipur" },
+      { origin: "Guwahati", destination: "Shillong" },
+      { origin: "Lucknow", destination: "Patna" },
+      { origin: "Ranchi", destination: "Bhubaneswar" },
+      { origin: "Surat", destination: "Indore" },
+      { origin: "Nagpur", destination: "Raipur" }
+    ];
+
+    function parseMatrixCsv(lines, headers, fileName) {
+      const transporterCols = [];
+      const transporterMap = new Map();
+
+      for (let col = 1; col < headers.length; col++) {
+        const headerName = headers[col].trim();
+        if (!headerName) continue;
+
+        const numMatch = headerName.match(/\d+/);
+        const tId = numMatch ? parseInt(numMatch[0]) : col;
+        const tName = headerName.startsWith('T') || headerName.toLowerCase().includes('transporter')
+          ? headerName
+          : `Transporter ${headerName}`;
+
+        transporterCols.push({ colIndex: col, id: tId, name: tName });
+        transporterMap.set(tId, { id: tId, name: tName, laneQuotes: [] });
+      }
+
+      const laneMap = new Map();
+      const quotesPreview = [];
+
+      for (let row = 1; row < lines.length; row++) {
+        const cells = lines[row].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+        if (cells.length < 2) continue;
+
+        const laneCell = cells[0];
+        const numMatch = laneCell.match(/\d+/);
+        const laneId = numMatch ? parseInt(numMatch[0]) : row;
+
+        let origin = `Origin ${laneId}`;
+        let destination = `Destination ${laneId}`;
+        if (laneId >= 1 && laneId <= defaultCityPairs.length) {
+          origin = defaultCityPairs[laneId - 1].origin;
+          destination = defaultCityPairs[laneId - 1].destination;
+        }
+
+        if (!laneMap.has(laneId)) {
+          laneMap.set(laneId, { id: laneId, origin, destination });
+        }
+
+        for (const t of transporterCols) {
+          if (t.colIndex < cells.length) {
+            const rawVal = cells[t.colIndex];
+            const quoteVal = parseFloat(rawVal);
+            if (!isNaN(quoteVal) && quoteVal > 0) {
+              transporterMap.get(t.id).laneQuotes.push({ laneId, quote: quoteVal });
+              quotesPreview.push({ laneId, origin, destination, tName: t.name, quote: quoteVal });
+            }
+          }
+        }
+      }
+
+      if (laneMap.size === 0 || transporterMap.size === 0) {
+        throw new Error('No valid lane quotes found in the matrix CSV.');
+      }
+
+      parsedDataset = {
+        lanes: Array.from(laneMap.values()),
+        transporters: Array.from(transporterMap.values()).filter(t => t.laneQuotes.length > 0)
+      };
+
+      showStatus(`Loaded "${fileName}" (Matrix Format): ${laneMap.size} lanes, ${parsedDataset.transporters.length} transporters, ${quotesPreview.length} quotes`, 'success');
+      renderPreview(quotesPreview, laneMap.size, parsedDataset.transporters.length);
+      optimizeBtn.disabled = false;
+    }
+
+    function parseFlatCsv(lines, rawHeaders, lowerHeaders, fileName) {
+      const laneIdIdx = lowerHeaders.findIndex(h => h.includes('lane') && h.includes('id'));
+      const originIdx = lowerHeaders.findIndex(h => h.includes('origin') || h.includes('from') || h.includes('source'));
+      const destIdx = lowerHeaders.findIndex(h => h.includes('dest') || h.includes('to'));
+      const transIdIdx = lowerHeaders.findIndex(h => (h.includes('transporter') || h.includes('carrier') || h.includes('vendor')) && h.includes('id'));
+      const transNameIdx = lowerHeaders.findIndex(h => (h.includes('transporter') || h.includes('carrier') || h.includes('vendor')) && (h.includes('name') || !h.includes('id')));
+      const quoteIdx = lowerHeaders.findIndex(h => h.includes('quote') || h.includes('price') || h.includes('cost') || h.includes('amount') || h.includes('rate'));
+
+      if (laneIdIdx === -1 || originIdx === -1 || destIdx === -1 || quoteIdx === -1) {
+        throw new Error('CSV must contain columns: Lane ID, Origin, Destination, Transporter ID/Name, and Quote');
+      }
+
+      const laneMap = new Map();
+      const transporterMap = new Map();
+      const quotesPreview = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+        if (cols.length < 4) continue;
+
+        const laneId = parseInt(cols[laneIdIdx]);
+        const origin = cols[originIdx];
+        const destination = cols[destIdx];
+        const tId = transIdIdx !== -1 ? parseInt(cols[transIdIdx]) : (i % 5 + 1);
+        const tName = transNameIdx !== -1 ? cols[transNameIdx] : `Transporter ${tId}`;
+        const quote = parseFloat(cols[quoteIdx]);
+
+        if (isNaN(laneId) || !origin || !destination || isNaN(quote) || quote <= 0) {
+          continue;
+        }
+
+        if (!laneMap.has(laneId)) {
+          laneMap.set(laneId, { id: laneId, origin, destination });
+        }
+
+        if (!transporterMap.has(tId)) {
+          transporterMap.set(tId, { id: tId, name: tName, laneQuotes: [] });
+        }
+
+        transporterMap.get(tId).laneQuotes.push({ laneId, quote });
+        quotesPreview.push({ laneId, origin, destination, tName, quote });
+      }
+
+      if (laneMap.size === 0 || transporterMap.size === 0) {
+        throw new Error('No valid lane or quote rows could be parsed from the CSV.');
+      }
+
+      parsedDataset = {
+        lanes: Array.from(laneMap.values()),
+        transporters: Array.from(transporterMap.values())
+      };
+
+      showStatus(`Loaded "${fileName}": ${laneMap.size} lanes, ${transporterMap.size} transporters, ${quotesPreview.length} quotes`, 'success');
+      renderPreview(quotesPreview, laneMap.size, transporterMap.size);
+      optimizeBtn.disabled = false;
+    }
+
+    function showStatus(msg, type) {
+      fileStatus.style.display = 'block';
+      fileStatus.className = 'file-status ' + type;
+      fileStatus.textContent = msg;
+    }
+
+    function renderPreview(quotes, laneCount, transporterCount) {
+      previewEmptyState.style.display = 'none';
+      previewContent.style.display = 'block';
+      previewStats.textContent = `${laneCount} Lanes, ${transporterCount} Transporters, ${quotes.length} Quotes`;
+
+      previewTableBody.innerHTML = '';
+      quotes.slice(0, 8).forEach(q => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>#${q.laneId}</td>
+          <td>${q.origin} <span class="route-arrow">→</span> ${q.destination}</td>
+          <td><b>${q.tName}</b></td>
+          <td><span class="quote-badge">₹${q.quote.toFixed(2)}</span></td>
+        `;
+        previewTableBody.appendChild(row);
+      });
+    }
+
+    optimizeBtn.addEventListener('click', async () => {
+      if (!parsedDataset) return;
+
+      const maxTransporters = parseInt(maxTransportersInput.value) || 3;
+      if (maxTransporters < 1) {
+        alert('maxTransporters must be at least 1');
+        return;
+      }
+
+      optimizeBtn.disabled = true;
+      spinner.style.display = 'inline-block';
+      btnText.textContent = 'Optimizing Assignments...';
+
+      try {
+        const inputRes = await fetch('/api/v1/transporters/input', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(parsedDataset)
+        });
+
+        if (!inputRes.ok) {
+          const errData = await inputRes.json();
+          throw new Error(errData.message || 'Failed to save input data');
+        }
+
+        const assignRes = await fetch('/api/v1/transporters/assignment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ maxTransporters })
+        });
+
+        if (!assignRes.ok) {
+          const errData = await assignRes.json();
+          throw new Error(errData.message || 'No feasible assignment could be found');
+        }
+
+        const result = await assignRes.json();
+        renderResults(result, maxTransporters);
+
+      } catch (err) {
+        alert('Optimization Error: ' + err.message);
+      } finally {
+        optimizeBtn.disabled = false;
+        spinner.style.display = 'none';
+        btnText.textContent = 'Analyze & Optimize Assignment';
+      }
+    });
+
+    function renderResults(result, maxTransporters) {
+      resultsSection.style.display = 'block';
+      resultsSection.scrollIntoView({ behavior: 'smooth' });
+
+      document.getElementById('resultTotalCost').textContent = '₹' + Number(result.totalCost).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+      document.getElementById('resultTransporterCount').textContent = result.transporterCount;
+      document.getElementById('resultMaxTransportersText').textContent = `Out of ${maxTransporters} max allowed`;
+      document.getElementById('resultLanesCovered').textContent = `${result.assignedLanes} / ${result.totalLanes}`;
+
+      const badgesContainer = document.getElementById('selectedTransportersBadges');
+      badgesContainer.innerHTML = '';
+      result.selectedTransporters.forEach(t => {
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.innerHTML = `<span class="badge-dot"></span> #${t.transporterId}: ${t.transporterName}`;
+        badgesContainer.appendChild(badge);
+      });
+
+      const tbody = document.getElementById('assignmentsTableBody');
+      tbody.innerHTML = '';
+      result.assignments.forEach(a => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>#${a.laneId}</td>
+          <td><b>${a.origin}</b> <span class="route-arrow">→</span> <b>${a.destination}</b></td>
+          <td><span style="font-weight:600; color: #1e293b;">${a.transporterName}</span> <small style="color:var(--text-muted);">(ID: ${a.transporterId})</small></td>
+          <td><span class="quote-badge">₹${Number(a.assignedQuote).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    loadSampleBtn.addEventListener('click', () => {
+      const sampleCsv = `Trade Lane,T1,T2,T3,T4,T5,T6,T7
+Lane 1,20835,48844,39020,14400,11601,35095,26070
+Lane 2,10512,31326,20648,44514,19760,12494,41098
+Lane 3,22105,18640,31438,14316,40870,17808,20932
+Lane 4,42481,45828,36447,10678,20635,36210,16897
+Lane 5,19862,18297,12789,13032,26421,39444,27938
+Lane 6,13567,45810,49985,46024,28809,29948,43517
+Lane 7,10015,49573,35285,42342,27815,17320,25881
+Lane 8,17886,45122,10281,35742,17024,10492,46136
+Lane 9,43996,31856,40092,48921,44691,37864,31286`;
+      parseCsvText(sampleCsv, 'freightfox_sample_dataset.csv');
+    });
+
+    downloadTemplateBtn.addEventListener('click', () => {
+      const template = `Trade Lane,T1,T2,T3,T4,T5,T6,T7
+Lane 1,20835,48844,39020,14400,11601,35095,26070
+Lane 2,10512,31326,20648,44514,19760,12494,41098
+Lane 3,22105,18640,31438,14316,40870,17808,20932`;
+      const blob = new Blob([template], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('download', 'transporter_assignment_matrix_template.csv');
+      a.click();
+    });
+  </script>
+</body>
+</html>

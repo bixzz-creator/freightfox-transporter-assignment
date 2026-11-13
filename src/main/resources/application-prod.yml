@@ -1,0 +1,26 @@
+# Production Profile Configuration
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  health:
+    db:
+      enabled: true
+
+logging:
+  level:
+    com.freightfox.transporter: INFO
+    org.hibernate.SQL: WARN
+    root: WARN
