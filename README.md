@@ -193,19 +193,32 @@ Interactive Swagger UI documentation is available at:
 ```json
 {
   "lanes": [
-    { "laneId": "L1", "origin": "DELHI", "destination": "MUMBAI" },
-    { "laneId": "L2", "origin": "MUMBAI", "destination": "BANGALORE" }
+    { "id": 1, "origin": "DELHI", "destination": "MUMBAI" },
+    { "id": 2, "origin": "MUMBAI", "destination": "BANGALORE" }
   ],
   "transporters": [
-    { "transporterId": "T1", "name": "Safe Transport" },
-    { "transporterId": "T2", "name": "Speedy Freight" },
-    { "transporterId": "T3", "name": "Apex Logistics" }
-  ],
-  "quotes": [
-    { "laneId": "L1", "transporterId": "T1", "quoteAmount": 15000.00 },
-    { "laneId": "L1", "transporterId": "T2", "quoteAmount": 14200.00 },
-    { "laneId": "L2", "transporterId": "T2", "quoteAmount": 21000.00 },
-    { "laneId": "L2", "transporterId": "T3", "quoteAmount": 19500.00 }
+    {
+      "id": 1,
+      "name": "Safe Transport",
+      "laneQuotes": [
+        { "laneId": 1, "quote": 15000.00 }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Speedy Freight",
+      "laneQuotes": [
+        { "laneId": 1, "quote": 14200.00 },
+        { "laneId": 2, "quote": 21000.00 }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Apex Logistics",
+      "laneQuotes": [
+        { "laneId": 2, "quote": 19500.00 }
+      ]
+    }
   ]
 }
 ```
@@ -213,11 +226,11 @@ Interactive Swagger UI documentation is available at:
 #### Response (`200 OK`)
 ```json
 {
-  "success": true,
-  "message": "Dataset successfully persisted with atomic replacement. 2 lanes, 3 transporters, 4 quotes.",
+  "status": "SUCCESS",
   "lanesCount": 2,
   "transportersCount": 3,
-  "quotesCount": 4
+  "quotesCount": 4,
+  "message": "Input data saved successfully. Previous data has been replaced."
 }
 ```
 
@@ -236,28 +249,39 @@ Interactive Swagger UI documentation is available at:
 #### Response (`200 OK`)
 ```json
 {
-  "assignments": [
+  "status": "SUCCESS",
+  "totalCost": 33700.00,
+  "selectedTransporters": [
     {
-      "laneId": "L1",
-      "origin": "DELHI",
-      "destination": "MUMBAI",
-      "transporterId": "T2",
-      "transporterName": "Speedy Freight",
-      "cost": 14200.00
+      "transporterId": 2,
+      "transporterName": "Speedy Freight"
     },
     {
-      "laneId": "L2",
-      "origin": "MUMBAI",
-      "destination": "BANGALORE",
-      "transporterId": "T3",
-      "transporterName": "Apex Logistics",
-      "cost": 19500.00
+      "transporterId": 3,
+      "transporterName": "Apex Logistics"
     }
   ],
-  "totalCost": 33700.00,
-  "selectedTransporters": ["T2", "T3"],
-  "distinctTransportersCount": 2,
-  "totalLanesAssigned": 2
+  "assignments": [
+    {
+      "laneId": 1,
+      "origin": "DELHI",
+      "destination": "MUMBAI",
+      "transporterId": 2,
+      "transporterName": "Speedy Freight",
+      "assignedQuote": 14200.00
+    },
+    {
+      "laneId": 2,
+      "origin": "MUMBAI",
+      "destination": "BANGALORE",
+      "transporterId": 3,
+      "transporterName": "Apex Logistics",
+      "assignedQuote": 19500.00
+    }
+  ],
+  "totalLanes": 2,
+  "assignedLanes": 2,
+  "transporterCount": 2
 }
 ```
 
