@@ -36,17 +36,17 @@ COPY --from=builder --chown=appuser:appgroup /build/target/*.jar app.jar
 # Run as non-root user
 USER appuser:appgroup
 
-# Expose HTTP port (Render, Railway, AWS map this port automatically)
-EXPOSE 8080
+# Expose HTTP ports (Render defaults to 10000, standard containers use 8080)
+EXPOSE 10000 8080
 
-# JVM memory ergonomics, container support, and dynamic port configuration
-ENV PORT=8080 \
-    SERVER_PORT=8080 \
+# JVM memory ergonomics, container support, and default port configuration
+ENV PORT=10000 \
+    SERVER_PORT=10000 \
     SPRING_PROFILES_ACTIVE=prod \
     JAVA_TOOL_OPTIONS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"
 
-# Actuator health check probe (evaluates dynamic PORT with 8080 fallback)
-HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:${PORT:-8080}/actuator/health || exit 1
+# Actuator health check probe (evaluates dynamic PORT with 10000 fallback)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:${PORT:-10000}/actuator/health || exit 1
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_TOOL_OPTIONS -jar app.jar --server.port=${PORT:-10000} --server.address=0.0.0.0"]
