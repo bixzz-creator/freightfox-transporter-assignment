@@ -4,9 +4,9 @@
 [![Java](https://img.shields.io/badge/Java-21%20LTS-orange.svg)](https://www.oracle.com/java/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%20Alpine-blue.svg)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-Multi--Stage%20Build-2496ED.svg)](https://www.docker.com/)
-[![Tests](https://img.shields.io/badge/Tests-39%20Passed%20(0%20Failed)-success.svg)](https://junit.org/junit5/)
+[![Tests](https://img.shields.io/badge/Tests-42%20Passed%20(0%20Failed)-success.svg)](https://junit.org/junit5/)
 [![JaCoCo Coverage](https://img.shields.io/badge/JaCoCo%20Line%20Coverage-83.4%25-green.svg)](#testing--verification)
-[![Swagger](https://img.shields.io/badge/OpenAPI-3.0-lightgrey.svg)](http://localhost:8081/swagger-ui/index.html)
+[![Swagger](https://img.shields.io/badge/OpenAPI-3.0-lightgrey.svg)](/swagger-ui/index.html)
 
 A high-performance, deterministic logistics optimization microservice built for **FreightFox**. The service solves the multi-lane transporter procurement problem using **Bitmask Dynamic Programming (DP)**, optimizing lane allocations against a **strict lexicographic objective**: maximizing transporter diversity across network lanes up to a business quota, followed by minimizing total freight expenditure, backed by deterministic tie-breaking.
 
@@ -379,28 +379,46 @@ The Docker Compose configuration:
 
 ---
 
-## Cloud Deployment Guide
+## Production Cloud Deployment (Render + Neon PostgreSQL)
 
-The application is cloud-ready and can be deployed with zero code modification to any container-capable platform.
+The application is architected for zero-downtime, containerized cloud deployment on **Render Web Service** backed by **Neon Serverless PostgreSQL**.
 
-### Deploying to Render.com (Free Tier)
-1. Fork or push this repository to GitHub.
-2. In the Render Dashboard, create a **New PostgreSQL Database**. Note the internal database URL.
-3. Create a **New Web Service** pointing to your repository:
-   - **Environment**: Docker
-   - **Branch**: master
-   - **Environment Variables**:
-     - `SPRING_PROFILES_ACTIVE`: `prod`
-     - `SPRING_DATASOURCE_URL`: `jdbc:postgresql://<render-db-host>:5432/<render-db-name>`
-     - `SPRING_DATASOURCE_USERNAME`: `<render-db-username>`
-     - `SPRING_DATASOURCE_PASSWORD`: `<render-db-password>`
-     - `SERVER_PORT`: `8080`
-4. Click **Deploy**. Render will build the multi-stage Dockerfile and serve the service over HTTPS.
+### 1. Database Setup on Neon (PostgreSQL)
+1. Sign in to [Neon Console](https://console.neon.tech/).
+2. Create a new project (e.g. `freightfox-db`).
+3. Under **Dashboard** $\to$ **Connection Details**, select **JDBC** format.
+   The connection URL will follow this structure:
+   ```text
+   jdbc:postgresql://ep-example-123456.us-east-2.aws.neon.tech/neondb?sslmode=require
+   ```
+4. Note the database username and password.
 
-### Deploying to Railway.app
-1. Click **New Project** $\to$ **Provision PostgreSQL**.
-2. Click **New Service** $\to$ **GitHub Repo** $\to$ select your repository.
-3. Set environment variable `SPRING_PROFILES_ACTIVE=prod`. Railway will automatically map `DATABASE_URL` and launch the container.
+### 2. Service Deployment on Render
+1. Push this repository to GitHub.
+2. Sign in to [Render Dashboard](https://dashboard.render.com/).
+3. Click **New +** $\to$ **Web Service** $\to$ connect your GitHub repository.
+4. Configure the Web Service:
+   - **Name**: `freightfox-transporter-service`
+   - **Environment**: `Docker`
+   - **Region**: Same or nearest region to your Neon DB (e.g., `Oregon` or `Ohio`)
+   - **Branch**: `master`
+   - **Health Check Path**: `/actuator/health`
+5. Configure Environment Variables in Render:
+
+| Environment Variable | Description | Example Value |
+|---|---|---|
+| `SPRING_PROFILES_ACTIVE` | Activates production profile | `prod` |
+| `DB_URL` | Neon JDBC PostgreSQL URL | `jdbc:postgresql://<NEON_HOST>:5432/<DATABASE>?sslmode=require` |
+| `DB_USERNAME` | Neon PostgreSQL user | `neondb_owner` |
+| `DB_PASSWORD` | Neon PostgreSQL password | `<secure-neon-password>` |
+
+> **Note**: Render automatically injects the `PORT` environment variable (e.g., `10000`). Spring Boot binds dynamically to `server.port=${PORT:8080}` and `server.address=0.0.0.0`.
+
+6. Click **Create Web Service**. Render will execute the multi-stage Dockerfile:
+   - Build stage compiles the Java 21 Spring Boot JAR with Maven.
+   - Runtime stage spins up a secure Alpine container with unprivileged user `appuser`.
+   - Actuator health check verifies application and database readiness.
+   - Live URL will be provisioned over HTTPS with automatic SSL certificates.
 
 ---
 

@@ -16,14 +16,12 @@ window.AppState = {
 
 // 2. Resilient API Base URL & Fetch Wrapper
 function getApiBaseUrl() {
-  // If running inside the Spring Boot container on port 8081, use relative paths
+  // When served over HTTP/HTTPS (local server, Render, custom domain), use relative root
   if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
-    if (window.location.port === '8081') {
-      return '';
-    }
+    return '';
   }
-  // If opened as local file (file://) or different dev port, route to Spring Boot port 8081
-  return 'http://localhost:8081';
+  // Fallback if opened directly from local disk (file:// protocol) during offline browser inspection
+  return 'http://localhost:8080';
 }
 
 async function apiFetch(path, options = {}) {

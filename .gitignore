@@ -30,7 +30,15 @@ target/
 ### VS Code ###
 .vscode/
 
-### Logs & Env ###
+### Logs & Environment Secrets ###
 *.log
 .env
+.env.*
+!.env.example
+.env.local
+.env.production
+
+### OS files ###
+.DS_Store
+Thumbs.db
 

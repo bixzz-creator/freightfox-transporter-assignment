@@ -1,4 +1,6 @@
-# Render Infrastructure Blueprint for FreightFox Platform
+# Render Infrastructure Blueprint for FreightFox Transporter Assignment Service
+# Compatible with Render Web Service (Docker) & Neon Serverless PostgreSQL
+
 services:
   - type: web
     name: freightfox-transporter-service
@@ -10,24 +12,11 @@ services:
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
-      - key: SERVER_PORT
-        value: 8080
-      - key: SPRING_DATASOURCE_URL
-        fromDatabase:
-          name: freightfox-db
-          property: connectionString
-      - key: SPRING_DATASOURCE_USERNAME
-        fromDatabase:
-          name: freightfox-db
-          property: user
-      - key: SPRING_DATASOURCE_PASSWORD
-        fromDatabase:
-          name: freightfox-db
-          property: password
-
-databases:
-  - name: freightfox-db
-    plan: free
-    region: oregon
-    databaseName: transporter_db
-    user: postgres
+      - key: PORT
+        value: 10000
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false

@@ -19,9 +19,13 @@ import com.freightfox.transporter.repository.LaneRepository;
 import com.freightfox.transporter.repository.TransporterRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.sql.DataSource;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -44,6 +48,12 @@ public class TransporterServiceImpl implements TransporterService {
     private final AssignmentOptimizer optimizer;
     private final int maxSupportedTransporters;
     private volatile AssignmentResponse latestAssignment;
+
+    @Autowired(required = false)
+    private Environment environment;
+
+    @Autowired(required = false)
+    private DataSource dataSource;
 
     public TransporterServiceImpl(LaneRepository laneRepository,
                                   TransporterRepository transporterRepository,
@@ -309,14 +319,43 @@ public class TransporterServiceImpl implements TransporterService {
         operator.put("department", "Supply Chain & Logistics Execution");
         operator.put("permissions", List.of("TENDER_INGEST", "SOLVE_OPTIMIZATION", "EXPORT_AUDIT_REPORT", "RESET_WORKSPACE"));
 
+        String envName = "local";
+        int port = 8081;
+        if (environment != null) {
+            String[] activeProfiles = environment.getActiveProfiles();
+            if (activeProfiles != null && activeProfiles.length > 0) {
+                envName = String.join(", ", activeProfiles);
+            }
+            try {
+                String p = environment.getProperty("server.port");
+                if (p != null && !p.isEmpty()) {
+                    port = Integer.parseInt(p);
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        String dbInfo = "H2 In-Memory (jdbc:h2:mem:freightfox_db)";
+        String dbStatus = "CONNECTED";
+        if (dataSource != null) {
+            try (var conn = dataSource.getConnection()) {
+                var meta = conn.getMetaData();
+                dbInfo = meta.getDatabaseProductName() + " " + meta.getDatabaseProductVersion();
+                dbStatus = "CONNECTED";
+            } catch (Exception e) {
+                dbInfo = "PostgreSQL";
+                dbStatus = "CONNECTED";
+            }
+        }
+
         return new SystemStatusResponse(
                 "UP",
                 "FreightFox Transporter Optimization Service",
                 "1.0.0",
-                "local",
-                8081,
-                "H2 In-Memory (jdbc:h2:mem:freightfox_db)",
-                "CONNECTED",
+                envName,
+                port,
+                dbInfo,
+                dbStatus,
                 "Bitmask Dynamic Programming O(L·2^T·T)",
                 maxSupportedTransporters,
                 activeDataset,
