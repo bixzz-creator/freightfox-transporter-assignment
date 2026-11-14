@@ -33,6 +33,9 @@ management:
       base-path: /actuator
       exposure:
         include: health,info
+      cors:
+        allowed-origin-patterns: "*"
+        allowed-methods: GET,POST,OPTIONS
   endpoint:
     health:
       show-details: always

@@ -6,13 +6,13 @@
   <title>FreightFox — Enterprise Transporter Assignment & Logistics Platform</title>
 
   <!-- Typography & Fonts -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230284c7' stroke-width='2.2'><path d='M10 17h4V5H2v12h4m10 0h4v-7l-3-4h-5v11'/><circle cx='7.5' cy='17.5' r='2.5'/><circle cx='17.5' cy='17.5' r='2.5'/></svg>">
+  <link rel="icon" type="image/png" href="images/delivery.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Enterprise Design System Stylesheet -->
-  <link rel="stylesheet" href="/css/enterprise.css">
+  <link rel="stylesheet" href="css/enterprise.css?v=3.2">
 
   <!-- Leaflet 1.9.4 CSS for Interactive Map -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
@@ -22,12 +22,12 @@
   <div class="app-shell">
 
     <!-- ====================================================================
-         1. TOP ENTERPRISE NAVBAR (Dark Navy)
+         1. TOP ENTERPRISE NAVBAR (Clean White & Blue)
          ==================================================================== -->
     <header class="app-header">
       <div class="header-left">
-        <!-- Mobile Sidebar Toggle Hamburger -->
-        <button id="sidebarToggleBtn" class="sidebar-toggle-btn" aria-label="Toggle Navigation Sidebar">
+        <!-- Mobile & Desktop Sidebar Toggle Hamburger -->
+        <button id="sidebarToggleBtn" class="sidebar-toggle-btn" aria-label="Toggle Navigation Sidebar" title="Toggle Navigation Sidebar (Collapse / Expand)" aria-expanded="true">
           <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
           </svg>
@@ -36,11 +36,7 @@
         <!-- Brand Logotype -->
         <a href="#overview" class="brand-wrapper" id="brandLogo">
           <div class="brand-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M10 17h4V5H2v12h4m10 0h4v-7l-3-4h-5v11"/>
-              <circle cx="7.5" cy="17.5" r="2.5"/>
-              <circle cx="17.5" cy="17.5" r="2.5"/>
-            </svg>
+            <img src="images/delivery.png" alt="FreightFox Logo" class="brand-logo-img">
           </div>
           <div class="brand-name">
             FreightFox
@@ -56,20 +52,132 @@
           <span id="healthText">System Online</span>
         </div>
 
+        <!-- Refresh Workspace Button (Interactive Truck Motion) -->
+        <button id="btnRefreshApp" class="btn btn-outline btn-sm" title="Refresh & Synchronize Logistics Workspace" onclick="truckLoader.triggerRefresh()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          Refresh
+        </button>
+
         <!-- Documentation & Swagger UI Link -->
-        <a href="/swagger-ui/index.html" target="_blank" class="btn btn-outline btn-sm" style="background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); color: #e2e8f0;">
+        <a href="http://localhost:8081/swagger-ui/index.html" target="_blank" class="btn btn-outline btn-sm">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
           </svg>
           API Docs
         </a>
 
-        <!-- Enterprise User Profile Section -->
-        <div class="user-profile-badge">
-          <div class="user-avatar">FF</div>
-          <div class="user-info">
-            <span class="user-name">Logistics Ops</span>
-            <span class="user-role">Freight Operations Lead</span>
+        <!-- Enterprise Interactive Operator & System Diagnostics Widget -->
+        <div class="user-profile-wrapper" id="userProfileWrapper">
+          <button type="button" class="user-profile-btn" id="userProfileBtn" aria-expanded="false" aria-haspopup="true" title="System Diagnostics & Operator Profile">
+            <div class="user-avatar-badge">
+              <span>FF</span>
+              <span class="user-status-dot online" id="headerSystemStatusDot" title="System: Online (Spring Boot 8081)"></span>
+            </div>
+            <div class="user-info">
+              <span class="user-name" id="headerOperatorName">Logistics Ops</span>
+              <span class="user-role" id="headerOperatorRole">Freight Operations Lead</span>
+            </div>
+            <svg class="dropdown-chevron" width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+
+          <!-- Dynamic Operator & System Diagnostics Dropdown Panel -->
+          <div class="user-profile-dropdown" id="userProfileDropdown" style="display: none;">
+            <!-- Operator Summary Header -->
+            <div class="profile-dropdown-header">
+              <div class="profile-header-avatar">FF</div>
+              <div class="profile-header-meta">
+                <div class="profile-header-name" id="dropdownOperatorName">Logistics Ops</div>
+                <div class="profile-header-role" id="dropdownOperatorRole">Freight Operations Lead</div>
+                <div class="profile-header-dept">Supply Chain • Logistics Execution</div>
+              </div>
+              <span class="profile-session-pill">Active Session</span>
+            </div>
+
+            <!-- Live Backend Infrastructure Status Card -->
+            <div class="profile-status-card">
+              <div class="profile-status-card-title">
+                <span class="status-indicator-dot online"></span>
+                <span>Live Backend Infrastructure</span>
+                <span class="profile-ping-badge" id="dropdownPingBadge">Healthy</span>
+              </div>
+              <div class="profile-status-grid">
+                <div class="profile-status-item">
+                  <span class="status-label">Server</span>
+                  <span class="status-val" id="dropdownServerStatus">Spring Boot (8081)</span>
+                </div>
+                <div class="profile-status-item">
+                  <span class="status-label">Database</span>
+                  <span class="status-val" id="dropdownDbStatus">H2 In-Memory</span>
+                </div>
+                <div class="profile-status-item">
+                  <span class="status-label">Environment</span>
+                  <span class="status-val" id="dropdownEnvStatus">Local Mode</span>
+                </div>
+                <div class="profile-status-item">
+                  <span class="status-label">Solver Engine</span>
+                  <span class="status-val">Bitmask DP O(L·2^T·T)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Persisted Database Corridors & Carrier Stats -->
+            <div class="profile-db-summary">
+              <div class="profile-db-summary-title">Persisted Tender State</div>
+              <div class="profile-db-metrics">
+                <div class="profile-db-metric-item">
+                  <span class="metric-num" id="dropdownLanesCount">0</span>
+                  <span class="metric-desc">Corridors</span>
+                </div>
+                <div class="profile-db-metric-item">
+                  <span class="metric-num" id="dropdownTransportersCount">0</span>
+                  <span class="metric-desc">Carriers</span>
+                </div>
+                <div class="profile-db-metric-item">
+                  <span class="metric-num" id="dropdownQuotesCount">0</span>
+                  <span class="metric-desc">Quotes</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Enterprise System Links & Endpoints -->
+            <div class="profile-actions-list">
+              <a href="/swagger-ui.html" target="_blank" class="profile-action-link">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                </svg>
+                <span>OpenAPI / Swagger UI Spec</span>
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-left: auto; opacity: 0.5;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+              </a>
+              <a href="/actuator/health" target="_blank" class="profile-action-link">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+                <span>Actuator Health Diagnostic</span>
+                <span class="profile-health-pill UP" id="dropdownActuatorHealth">UP</span>
+              </a>
+              <button type="button" class="profile-action-link text-danger" id="profileBtnUnloadDataset">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                <span>Unload Active Dataset</span>
+              </button>
+            </div>
+
+            <!-- Operator Persona Quick Switcher -->
+            <div class="profile-persona-footer">
+              <span class="persona-label">Operator Persona:</span>
+              <div class="persona-options">
+                <button type="button" class="persona-chip active" data-persona="Freight Operations Lead">Lead</button>
+                <button type="button" class="persona-chip" data-persona="Procurement Auditor">Auditor</button>
+                <button type="button" class="persona-chip" data-persona="Supply Chain Director">Director</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -89,58 +197,104 @@
           <div class="nav-section-label">Logistics Workspace</div>
           <ul class="nav-menu">
             <li class="nav-item">
-              <a href="#overview" class="nav-link active" data-view="overview" id="nav-overview">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-                </svg>
-                Overview
+              <a href="#overview" class="nav-link active" data-view="overview" id="nav-overview" title="Overview Dashboard">
+                <span class="nav-icon-badge nav-icon-overview">
+                  <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="3" width="8" height="8" rx="2" fill="#2563eb"/>
+                    <rect x="13" y="3" width="8" height="8" rx="2" fill="#0ea5e9"/>
+                    <rect x="3" y="13" width="8" height="8" rx="2" fill="#06b6d4"/>
+                    <rect x="13" y="13" width="8" height="8" rx="2" fill="#4f46e5"/>
+                  </svg>
+                </span>
+                <span class="nav-text">Overview</span>
               </a>
             </li>
 
             <li class="nav-item">
-              <a href="#optimization" class="nav-link" data-view="optimization" id="nav-optimization">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                </svg>
-                Lane Optimization
+              <a href="#optimization" class="nav-link" data-view="optimization" id="nav-optimization" title="Lane Optimization (Bitmask DP)">
+                <span class="nav-icon-badge nav-icon-optimization">
+                  <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13 2.5L4 13.5H11.5L9.5 21.5L19.5 10.5H12L13 2.5Z" fill="#f59e0b" stroke="#d97706" stroke-width="1.2" stroke-linejoin="round"/>
+                    <circle cx="17.5" cy="4.5" r="1.5" fill="#fbbf24"/>
+                  </svg>
+                </span>
+                <span class="nav-text">Lane Optimization</span>
                 <span class="nav-item-badge" id="navOptBadge">DP</span>
               </a>
             </li>
 
             <li class="nav-item">
-              <a href="#map" class="nav-link" data-view="map" id="nav-map">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-                </svg>
-                Live Map
+              <a href="#map" class="nav-link" data-view="map" id="nav-map" title="Live Transportation Map">
+                <span class="nav-icon-badge nav-icon-map">
+                  <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Map 3D Folds -->
+                    <path d="M3 6.5L8.5 3.5V17.5L3 20.5V6.5Z" fill="#a7f3d0" stroke="#059669" stroke-width="1.2" stroke-linejoin="round"/>
+                    <path d="M8.5 3.5L15.5 6.5V20.5L8.5 17.5V3.5Z" fill="#6ee7b7" stroke="#059669" stroke-width="1.2" stroke-linejoin="round"/>
+                    <path d="M15.5 6.5L21 3.5V17.5L15.5 20.5V6.5Z" fill="#34d399" stroke="#059669" stroke-width="1.2" stroke-linejoin="round"/>
+                    <!-- Blue Transit Highway Route -->
+                    <path d="M5 16C7.5 14 10 17 13 13C15 10.5 17 11 19 8" stroke="#2563eb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- Red Location Pin Pinpointing Destination -->
+                    <g class="map-pin-pulse">
+                      <path d="M15.5 4C14.12 4 13 5.12 13 6.5C13 8.38 15.5 11 15.5 11C15.5 11 18 8.38 18 6.5C18 5.12 16.88 4 15.5 4Z" fill="#ef4444" stroke="#b91c1c" stroke-width="0.8"/>
+                      <circle cx="15.5" cy="6.5" r="1.2" fill="#ffffff"/>
+                    </g>
+                  </svg>
+                </span>
+                <span class="nav-text">Live Map</span>
                 <span class="nav-item-badge badge-active" id="navMapBadge" style="display:none;">Active</span>
               </a>
             </li>
 
             <li class="nav-item">
-              <a href="#assignments" class="nav-link" data-view="assignments" id="nav-assignments">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-                </svg>
-                Assignments
+              <a href="#assignments" class="nav-link" data-view="assignments" id="nav-assignments" title="Lane Allocation Registry">
+                <span class="nav-icon-badge nav-icon-assignments">
+                  <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Clipboard Board -->
+                    <rect x="4.5" y="4" width="15" height="17" rx="2.5" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1.5"/>
+                    <!-- Header Clip -->
+                    <rect x="8.5" y="2.5" width="7" height="3" rx="1.5" fill="#8b5cf6"/>
+                    <!-- Checkmarks & Allocation Lines -->
+                    <path d="M7.5 10L9.5 12L13 8.5" stroke="#10b981" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="14.5" y1="10" x2="16.5" y2="10" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M7.5 15L9.5 17L13 13.5" stroke="#10b981" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="14.5" y1="15" x2="16.5" y2="15" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                <span class="nav-text">Assignments</span>
               </a>
             </li>
 
             <li class="nav-item">
-              <a href="#dataset" class="nav-link" data-view="dataset" id="nav-dataset">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                </svg>
-                Dataset Management
+              <a href="#dataset" class="nav-link" data-view="dataset" id="nav-dataset" title="Tender Dataset Management">
+                <span class="nav-icon-badge nav-icon-dataset">
+                  <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Soft Cloud -->
+                    <path d="M6.5 15.5C4.5 15.5 3 14 3 12C3 10.2 4.3 8.7 6.1 8.5C6.7 6.2 8.8 4.5 11.3 4.5C14.3 4.5 16.7 6.8 17 9.8C18.7 10.1 20 11.6 20 13.4C20 15.4 18.4 17 16.4 17H7" fill="#ffe4e6" stroke="#f43f5e" stroke-width="1.5" stroke-linejoin="round"/>
+                    <!-- Vibrant Up Arrow -->
+                    <path d="M12 11V18" stroke="#e11d48" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M9.5 13.5L12 11L14.5 13.5" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+                <span class="nav-text">Dataset Management</span>
               </a>
             </li>
 
             <li class="nav-item">
-              <a href="#reports" class="nav-link" data-view="reports" id="nav-reports">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                Reports
+              <a href="#reports" class="nav-link" data-view="reports" id="nav-reports" title="Procurement Reports & Analytics">
+                <span class="nav-icon-badge nav-icon-reports">
+                  <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Base Axis -->
+                    <path d="M3 20H21" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round"/>
+                    <!-- Analytics Columns -->
+                    <rect x="5" y="13" width="3.5" height="6" rx="1" fill="#38bdf8"/>
+                    <rect x="10.5" y="9" width="3.5" height="10" rx="1" fill="#0284c7"/>
+                    <rect x="16" y="5" width="3.5" height="14" rx="1" fill="#0369a1"/>
+                    <!-- Growth Trend Curve with Dot -->
+                    <path d="M4 12L10.5 7L16 4" stroke="#10b981" stroke-width="1.75" stroke-linecap="round"/>
+                    <circle cx="16" cy="4" r="1.5" fill="#10b981"/>
+                  </svg>
+                </span>
+                <span class="nav-text">Reports</span>
               </a>
             </li>
           </ul>
@@ -236,7 +390,7 @@
 
             <div class="kpi-card">
               <div class="kpi-top">
-                <span class="kpi-label">Active Transporters</span>
+                <span class="kpi-label">Selected Transporters</span>
                 <div class="kpi-icon-box amber">
                   <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
@@ -284,6 +438,117 @@
 
           <!-- Real Results Container (Populated when dataset is active) -->
           <div id="overviewActiveContent" style="display: none;">
+
+            <!-- Status Banner (Dataset Ready vs Solved) -->
+            <div id="overviewStatusBanner" class="action-banner" style="margin-bottom: 24px;">
+              <div class="action-banner-text">
+                <h4 id="overviewStatusBannerTitle">✓ Dataset Ready for Optimization</h4>
+                <p id="overviewStatusBannerDesc">Lanes and transporter bids are synchronized in database. Configure constraints to run optimizer.</p>
+              </div>
+              <div id="overviewStatusBannerActions">
+                <button class="btn btn-primary btn-sm" onclick="appRouter.navigate('optimization')">
+                  Configure & Solve Optimization →
+                </button>
+              </div>
+            </div>
+
+            <!-- Quick Navigation to Application Modules -->
+            <div class="overview-quick-nav-grid">
+              <div class="quick-nav-card" onclick="appRouter.navigate('dataset')" role="button" tabindex="0">
+                <div>
+                  <div class="quick-nav-top">
+                    <span class="status-pill info">Tender Data</span>
+                    <div class="quick-nav-icon blue">
+                      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="quick-nav-title">Dataset Management</div>
+                  <div class="quick-nav-desc">Review imported freight rate matrix (9 lanes, 7 carriers, 63 quotes) or upload tender CSVs.</div>
+                </div>
+                <div class="quick-nav-action">
+                  <span>Open Dataset</span>
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </div>
+              </div>
+
+              <div class="quick-nav-card" onclick="appRouter.navigate('optimization')" role="button" tabindex="0">
+                <div>
+                  <div class="quick-nav-top">
+                    <span class="status-pill warning">Bitmask DP</span>
+                    <div class="quick-nav-icon amber">
+                      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="quick-nav-title">Lane Optimization</div>
+                  <div class="quick-nav-desc">Solve optimal allocations: maximize carrier usage (max 3) while minimizing freight spend.</div>
+                </div>
+                <div class="quick-nav-action">
+                  <span>Solve Optimizer</span>
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </div>
+              </div>
+
+              <div class="quick-nav-card" onclick="appRouter.navigate('map')" role="button" tabindex="0">
+                <div>
+                  <div class="quick-nav-top">
+                    <span class="status-pill success">GIS Highways</span>
+                    <div class="quick-nav-icon emerald">
+                      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="quick-nav-title">Interactive Live Map</div>
+                  <div class="quick-nav-desc">Multi-lane highway visualization across India with live truck markers & route paths.</div>
+                </div>
+                <div class="quick-nav-action">
+                  <span>Explore Live Map</span>
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </div>
+              </div>
+
+              <div class="quick-nav-card" onclick="appRouter.navigate('assignments')" role="button" tabindex="0">
+                <div>
+                  <div class="quick-nav-top">
+                    <span class="status-pill primary">Allocations</span>
+                    <div class="quick-nav-icon purple">
+                      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="quick-nav-title">Carrier Assignments</div>
+                  <div class="quick-nav-desc">Full breakdown by lane, awarded quotes, carrier share and bid comparisons.</div>
+                </div>
+                <div class="quick-nav-action">
+                  <span>View Assignments</span>
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Carrier Allocation Distribution (Shown when optimized) -->
+            <div class="enterprise-card" id="overviewCarrierAllocationCard" style="display: none; margin-bottom: 24px;">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+                    </svg>
+                    Transporter Utilization & Spend Distribution
+                  </h3>
+                  <div class="card-subtitle">Volume and expenditure allocation across winning carriers</div>
+                </div>
+              </div>
+              <div class="card-body" id="overviewCarrierBars"></div>
+            </div>
+
+            <!-- Active Lanes Corridor Table -->
             <div class="enterprise-card">
               <div class="card-header">
                 <div>
@@ -291,26 +556,31 @@
                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
-                    Active Tender Dataset Overview
+                    Active Freight Corridors
                   </h3>
                   <div class="card-subtitle" id="overviewActiveDatasetSub">
                     Synchronized with database. Ready for constraint-based procurement optimization.
                   </div>
                 </div>
-                <button class="btn btn-primary btn-sm" onclick="appRouter.navigate('optimization')">
-                  Proceed to Optimization →
-                </button>
+                <div class="workspace-actions" style="display:flex; align-items:center; gap:10px;">
+                  <input type="text" id="overviewLaneSearch" class="form-input" placeholder="Search corridor (e.g. Delhi, Mumbai)..." style="width: 220px; padding: 6px 12px; font-size: 0.8125rem;" oninput="overviewManager.filterLanes(this.value)">
+                  <button class="btn btn-primary btn-sm" onclick="appRouter.navigate('map')">
+                    View on Live Map →
+                  </button>
+                </div>
               </div>
               <div class="card-body">
-                <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
+                <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
                   <table class="enterprise-table">
                     <thead>
                       <tr>
                         <th>Lane ID</th>
                         <th>Origin Corridor</th>
                         <th>Destination</th>
-                        <th>Eligible Transporters</th>
+                        <th>Winning Carrier</th>
+                        <th>Assigned Rate</th>
                         <th>Status</th>
+                        <th style="text-align: right;">Action</th>
                       </tr>
                     </thead>
                     <tbody id="overviewLanesTableBody"></tbody>
@@ -318,6 +588,7 @@
                 </div>
               </div>
             </div>
+
           </div>
 
         </section>
@@ -326,112 +597,384 @@
              VIEW 2: LANE OPTIMIZATION
              ================================================================== -->
         <section id="view-optimization" class="view-panel">
-          <div class="enterprise-card">
-            <div class="card-header">
-              <div>
-                <h2 class="card-title">
-                  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
-                  </svg>
-                  Bitmask DP Optimizer Control
-                </h2>
-                <div class="card-subtitle">Configure operational constraints and solve the exact lexicographic optimization objective.</div>
-              </div>
+          
+          <!-- Empty State (When no dataset) -->
+          <div class="empty-state-card" id="optEmptyState">
+            <div class="empty-state-icon-wrapper">
+              <svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
             </div>
-            <div class="card-body">
-              <div class="empty-state-card" id="optEmptyState">
-                <div class="empty-state-icon-wrapper">
-                  <svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                  </svg>
-                </div>
-                <h3 class="empty-state-title">Dataset Required for Optimization</h3>
-                <p class="empty-state-desc">
-                  Please upload a transportation tender dataset before configuring optimization parameters.
-                </p>
-                <div class="empty-state-actions">
-                  <button class="btn btn-primary" onclick="appRouter.navigate('dataset')">Upload Dataset</button>
-                </div>
-              </div>
+            <h3 class="empty-state-title">Dataset Required for Optimization</h3>
+            <p class="empty-state-desc">
+              Please upload or load a tender dataset before configuring optimization constraints and running the Bitmask DP algorithm.
+            </p>
+            <div class="empty-state-actions">
+              <button class="btn btn-primary" onclick="appRouter.navigate('dataset')">
+                Upload Tender Dataset
+              </button>
             </div>
           </div>
+
+          <!-- Optimization Workspace (When dataset is present) -->
+          <div id="optActiveWorkspace" style="display: none;">
+
+            <!-- Results Banner (Appears after optimization) -->
+            <div id="optResultsBanner" class="opt-results-banner" style="display: none;">
+              <div class="opt-results-header">
+                <div>
+                  <div class="opt-badge-tag">
+                    ✓ Optimization Complete — Optimal Solution
+                  </div>
+                  <h2 class="opt-results-title">
+                    Bitmask Dynamic Programming Solved
+                  </h2>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                  <button class="btn btn-primary btn-sm" onclick="appRouter.navigate('map')">
+                    Inspect on Live Map →
+                  </button>
+                  <button class="btn btn-outline btn-sm" onclick="appRouter.navigate('assignments')">
+                    Assignment Registry
+                  </button>
+                </div>
+              </div>
+
+              <div class="opt-results-kpis">
+                <div class="opt-kpi-box">
+                  <div class="opt-kpi-label">Total Freight Cost</div>
+                  <div class="opt-kpi-val" id="optResultTotalCost">₹0.00</div>
+                </div>
+                <div class="opt-kpi-box">
+                  <div class="opt-kpi-label">Selected Transporters</div>
+                  <div class="opt-kpi-val" id="optResultTransportersCount">0</div>
+                </div>
+                <div class="opt-kpi-box">
+                  <div class="opt-kpi-label">Lanes Coverage</div>
+                  <div class="opt-kpi-val" id="optResultCoverage">100%</div>
+                </div>
+                <div class="opt-kpi-box">
+                  <div class="opt-kpi-label">DP Algorithm Time</div>
+                  <div class="opt-kpi-val" id="optResultSolveTime">&lt; 15ms</div>
+                </div>
+              </div>
+
+              <!-- Selected Transporters List -->
+              <div class="opt-transporters-footer">
+                <span class="opt-transporters-label">Selected Transporters:</span>
+                <div id="optSelectedTransporterBadges" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+              </div>
+            </div>
+
+            <!-- Parameters Grid -->
+            <div class="optimizer-control-grid">
+              
+              <!-- Parameters Form Card -->
+              <div class="opt-param-card">
+                <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">
+                  Operational Constraints
+                </h3>
+                <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 20px;">
+                  Control the maximum number of distinct transporters permitted in the final procurement allocation.
+                </p>
+
+                <div class="form-group">
+                  <label class="form-label" for="maxTransportersInput">
+                    Maximum Transporters (<span class="code">maxTransporters</span>)
+                  </label>
+                  <input type="number" id="maxTransportersInput" class="form-input" min="1" max="20" value="3">
+                  <div class="form-hint" id="maxTransportersHint">
+                    Total available quoting carriers: 7. Permitted range: 1 to 20.
+                  </div>
+                </div>
+
+                <div style="margin-bottom: 20px; background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 12px 14px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 0.8125rem; margin-bottom: 4px;">
+                    <span style="color: var(--text-muted);">Active Ingested Lanes:</span>
+                    <b id="optParamLaneCount">9</b>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 0.8125rem;">
+                    <span style="color: var(--text-muted);">Quoting Transporters:</span>
+                    <b id="optParamTransporterCount">7</b>
+                  </div>
+                </div>
+
+                <button type="button" class="btn btn-primary" id="btnRunOptimizer" style="width: 100%; justify-content: center; padding: 12px;">
+                  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+                  <span>Run Bitmask DP Optimizer</span>
+                </button>
+
+                <div id="optValidationBanner" class="validation-banner" style="display: none; margin-top: 14px;"></div>
+              </div>
+
+              <!-- Logistics Optimization Policy & Objectives -->
+              <div class="enterprise-card" style="margin-bottom: 0;">
+                <div class="card-header">
+                  <div>
+                    <h3 class="card-title">
+                      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                      </svg>
+                      Procurement Allocation Policy
+                    </h3>
+                    <div class="card-subtitle">Automated multi-carrier operational rules</div>
+                  </div>
+                  <span class="status-pill success">Enterprise TMS</span>
+                </div>
+                <div class="card-body">
+                  <div style="font-size: 0.875rem; color: #334155; line-height: 1.6;">
+                    <div style="display: flex; gap: 14px; margin-bottom: 16px;">
+                      <div style="width: 32px; height: 32px; border-radius: 8px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 700; font-size: 0.875rem;">1</div>
+                      <div>
+                        <b style="color: var(--text-main);">Carrier Diversification:</b>
+                        <div style="font-size: 0.8125rem; color: var(--text-muted); margin-top: 2px;">
+                          Maximizes distinct active transporters up to your constraint (<span class="code">maxTransporters</span>), mitigating carrier concentration risk.
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style="display: flex; gap: 14px; margin-bottom: 16px;">
+                      <div style="width: 32px; height: 32px; border-radius: 8px; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 700; font-size: 0.875rem;">2</div>
+                      <div>
+                        <b style="color: var(--text-main);">Cost Minimization:</b>
+                        <div style="font-size: 0.8125rem; color: var(--text-muted); margin-top: 2px;">
+                          Selects the global least-cost quotation combination across all corridors for the chosen carrier set.
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style="display: flex; gap: 14px; margin-bottom: 20px;">
+                      <div style="width: 32px; height: 32px; border-radius: 8px; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 700; font-size: 0.875rem;">3</div>
+                      <div>
+                        <b style="color: var(--text-main);">100% Lane Fulfillment:</b>
+                        <div style="font-size: 0.8125rem; color: var(--text-muted); margin-top: 2px;">
+                          Every transportation trade lane is guaranteed an optimal carrier assignment.
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style="background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                      <span style="font-size: 0.8125rem; color: var(--text-muted);">Solver Engine:</span>
+                      <span style="font-size: 0.8125rem; font-weight: 700; color: #0284c7;">Exact Global Optimality (Zero Heuristics)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
         </section>
 
         <!-- ==================================================================
              VIEW 3: LIVE MAP (Interactive Multi-Lane GIS)
              ================================================================== -->
         <section id="view-map" class="view-panel">
-          <div class="enterprise-card" style="margin-bottom: 0;">
-            <div class="card-header">
-              <div>
-                <h2 class="card-title">
-                  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-                  </svg>
-                  Multi-Lane Transportation GIS Map
-                </h2>
-                <div class="card-subtitle">
-                  Visualizes all assigned lanes with distinct high-contrast colors, real highway routing, and truck markers.
-                </div>
-              </div>
-              <div class="workspace-actions">
-                <span class="status-pill neutral">Illustrative GIS View</span>
-              </div>
+          
+          <!-- Empty State (When no optimization results) -->
+          <div class="empty-state-card" id="mapEmptyState">
+            <div class="empty-state-icon-wrapper">
+              <svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
             </div>
-            <div class="card-body" style="padding: 0; position: relative;">
-              <!-- Map Empty State Overlay (Shows until data is optimized) -->
-              <div class="empty-state-card" id="mapEmptyState" style="margin: 40px auto;">
-                <div class="empty-state-icon-wrapper">
-                  <svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
-                </div>
-                <h3 class="empty-state-title">No Active Routes to Display</h3>
-                <p class="empty-state-desc">
-                  Load a tender dataset and execute optimization to project distinct multi-lane routes, highway paths, and transporter truck markers on the interactive map.
-                </p>
-                <div class="empty-state-actions">
-                  <button class="btn btn-primary" onclick="appRouter.navigate('dataset')">Upload Dataset First</button>
-                </div>
-              </div>
+            <h3 class="empty-state-title">No Active Routes to Display</h3>
+            <p class="empty-state-desc">
+              Upload a tender dataset and execute optimization to project distinct multi-lane routes, highway corridors, and transporter truck markers on the interactive map.
+            </p>
+            <div class="empty-state-actions">
+              <button class="btn btn-primary" onclick="appRouter.navigate('optimization')">
+                Run Optimization
+              </button>
             </div>
           </div>
+
+          <!-- Map Workspace (When optimization results exist) -->
+          <div id="mapContentWrapper" style="display: none;">
+            <div class="map-workspace-layout">
+              
+              <!-- Map Toolbar -->
+              <div class="map-toolbar">
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                  <span class="status-pill success" id="mapRouteCountBadge">9 Routes Active</span>
+                  <span class="status-pill info">OSRM Highway Routing</span>
+                  <span style="font-size: 0.8125rem; color: var(--text-muted);">
+                    Click any route, pin, or truck marker for granular lane details.
+                  </span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <button type="button" class="btn btn-outline btn-sm" id="btnFitAllRoutes" onclick="mapEngine.fitAllRoutes()">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                    </svg>
+                    Fit All Routes
+                  </button>
+                  <button type="button" class="btn btn-outline btn-sm" id="btnToggleLegend" onclick="mapEngine.toggleLegend()">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/>
+                    </svg>
+                    Toggle Legend
+                  </button>
+                </div>
+              </div>
+
+              <!-- Map Canvas & Overlays -->
+              <div class="map-canvas-container">
+                <div id="leafletMapContainer"></div>
+
+                <!-- Floating Route Legend Overlay -->
+                <div class="map-floating-legend" id="mapFloatingLegend">
+                  <div class="legend-header">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span>Assigned Lanes</span>
+                      <span id="legendTotalCountBadge" style="background: rgba(255,255,255,0.2); padding: 1px 6px; border-radius: 4px; font-size: 0.75rem;">9</span>
+                    </div>
+                    <button type="button" onclick="mapEngine.toggleLegend()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 0.9rem; padding: 0 4px;" title="Hide Legend">✕</button>
+                  </div>
+                  <div class="legend-body" id="mapLegendList">
+                    <!-- Populated dynamically by mapEngine -->
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
         </section>
 
         <!-- ==================================================================
              VIEW 4: ASSIGNMENTS
              ================================================================== -->
         <section id="view-assignments" class="view-panel">
-          <div class="enterprise-card">
-            <div class="card-header">
-              <div>
-                <h2 class="card-title">
-                  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-                  </svg>
-                  Lane Allocation Registry
-                </h2>
-                <div class="card-subtitle">Inspect winning transporters, quote amounts, and carrier diversification.</div>
-              </div>
+          
+          <!-- Empty State (When no optimization results) -->
+          <div class="empty-state-card" id="assignmentsEmptyState">
+            <div class="empty-state-icon-wrapper">
+              <svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+              </svg>
             </div>
-            <div class="card-body">
-              <div class="empty-state-card" id="assignmentsEmptyState">
-                <div class="empty-state-icon-wrapper">
-                  <svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                  </svg>
+            <h3 class="empty-state-title">No Assignments Generated</h3>
+            <p class="empty-state-desc">
+              Assignments will be listed here after running the Bitmask DP optimizer on your tender dataset.
+            </p>
+            <div class="empty-state-actions">
+              <button class="btn btn-primary" onclick="appRouter.navigate('optimization')">
+                Go to Lane Optimization
+              </button>
+            </div>
+          </div>
+
+          <!-- Assignments Content (When optimized) -->
+          <div id="assignmentsContentWrapper" style="display: none;">
+            <div class="enterprise-card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                    Lane Allocation Registry
+                  </h2>
+                  <div class="card-subtitle">Granular view of winning carriers, procurement quotations, and corridor geometry.</div>
                 </div>
-                <h3 class="empty-state-title">No Assignments Generated</h3>
-                <p class="empty-state-desc">
-                  Assignments will be listed here after solving the optimization model for your dataset.
-                </p>
-                <div class="empty-state-actions">
-                  <button class="btn btn-primary" onclick="appRouter.navigate('dataset')">Go to Dataset Management</button>
+                <div class="workspace-actions">
+                  <button class="btn btn-primary btn-sm" onclick="appRouter.navigate('map')">
+                    View on Live Map →
+                  </button>
                 </div>
+              </div>
+              <div class="card-body">
+                
+                <!-- Toolbar: Filter by carrier -->
+                <div class="assignment-toolbar">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <label style="font-size: 0.8125rem; font-weight: 600; color: #475569;">Filter Carrier:</label>
+                    <select id="carrierFilterSelect" class="carrier-filter-select">
+                      <option value="ALL">All Selected Transporters</option>
+                    </select>
+                  </div>
+                  <div style="font-size: 0.8125rem; color: var(--text-muted);" id="assignmentTableCountText">
+                    Showing 9 assigned lanes
+                  </div>
+                </div>
+
+                <!-- Assignment Registry Table -->
+                <div class="table-responsive" style="max-height: 480px; overflow-y: auto;">
+                  <table class="enterprise-table" id="assignmentTable">
+                    <thead>
+                      <tr>
+                        <th>Lane ID</th>
+                        <th>Origin Corridor</th>
+                        <th>Destination</th>
+                        <th>Assigned Transporter</th>
+                        <th>Winning Bid</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="assignmentTableBody"></tbody>
+                  </table>
+                </div>
+
               </div>
             </div>
           </div>
+
+          <!-- Bid Comparison Modal / Drawer -->
+          <div id="bidComparisonModal" class="assignment-drawer-backdrop">
+            <div class="assignment-modal">
+              <div class="modal-header">
+                <div>
+                  <h3 style="font-size: 1.1rem; font-weight: 700;" id="modalLaneTitle">Lane #1 Quotation Breakdown</h3>
+                  <div style="font-size: 0.8125rem; color: #94a3b8;" id="modalLaneCorridor">Mumbai → Delhi</div>
+                </div>
+                <button type="button" class="btn btn-sm" onclick="assignmentsManager.closeModal()">
+                  ✕ Close
+                </button>
+              </div>
+              <div class="modal-body">
+                
+                <!-- Savings Callout -->
+                <div style="background: var(--emerald-50); border: 1px solid var(--emerald-border); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #065f46;">Winning Allocation</div>
+                    <div style="font-size: 1.1rem; font-weight: 800; color: #065f46;" id="modalWinningCarrierText">ABC Logistics</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 0.75rem; color: #065f46; font-weight: 600;">Net Procurement Savings</div>
+                    <div style="font-size: 1.1rem; font-weight: 800; color: #065f46; font-family: 'JetBrains Mono';" id="modalSavingsAmount">₹0.00</div>
+                  </div>
+                </div>
+
+                <h4 style="font-size: 0.875rem; font-weight: 700; color: var(--text-main); margin-bottom: 10px;">
+                  All Received Carrier Quotations
+                </h4>
+                <div class="table-responsive">
+                  <table class="enterprise-table">
+                    <thead>
+                      <tr>
+                        <th>Transporter</th>
+                        <th>Quotation Amount</th>
+                        <th>Variance vs Winning</th>
+                        <th>Result</th>
+                      </tr>
+                    </thead>
+                    <tbody id="modalQuotesTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="assignmentsManager.closeModal()">Close</button>
+                <button type="button" class="btn btn-primary" id="btnModalFocusOnMap">View Route on Live Map →</button>
+              </div>
+            </div>
+          </div>
+
         </section>
 
         <!-- ==================================================================
@@ -448,7 +991,7 @@
                   Tender Dataset Ingestion
                 </h2>
                 <div class="card-subtitle">
-                  Upload tender files with atomic transactional replacement (`POST /api/v1/transporters/input`).
+                  Upload tender files with atomic transactional replacement (<code class="code">POST /api/v1/transporters/input</code>).
                 </div>
               </div>
             </div>
@@ -456,36 +999,132 @@
               <!-- Hidden native file input element -->
               <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display: none;">
 
-              <!-- Drag and Drop Upload Zone -->
+              <!-- Drag and Drop Upload Zone with Dual States (Empty vs Loaded) -->
               <div class="drop-zone" id="dropZone">
-                <div class="drop-icon-wrapper">
-                  <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                  </svg>
+                <!-- 1. Empty Upload State (Visible when no dataset is loaded) -->
+                <div id="dropZoneEmptyState" class="drop-zone-content">
+                  <div class="drop-icon-wrapper">
+                    <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                  </div>
+                  <div class="drop-title">Drag and drop your tender CSV file here</div>
+                  <div class="drop-subtitle">
+                    Supports Matrix Grid CSVs (e.g. <code>Trade Lane, T1..T7</code>) and standard Flat CSVs. Data validation is performed client-side and persisted atomically.
+                  </div>
+                  <div class="drop-actions">
+                    <button type="button" class="btn btn-primary" id="btnSelectCsv">
+                      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                      </svg>
+                      Select CSV File
+                    </button>
+                    <button type="button" class="btn btn-outline" id="btnDownloadTemplate">
+                      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                      </svg>
+                      Download CSV Template
+                    </button>
+                    <button type="button" class="btn btn-outline" id="btnLoadSampleDataset">
+                      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                      </svg>
+                      Load Sample Tender Data
+                    </button>
+                  </div>
                 </div>
-                <div class="drop-title">Drag and drop your tender CSV file here</div>
-                <div class="drop-subtitle">
-                  Supports Matrix Grid CSVs (e.g. <code>Trade Lane, T1..T7</code>) and standard Flat CSVs. Data validation is performed client-side and persisted atomically.
-                </div>
-                <div class="drop-actions">
-                  <button type="button" class="btn btn-primary" id="btnSelectCsv">
-                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                    </svg>
-                    Select CSV File
-                  </button>
-                  <button type="button" class="btn btn-outline" id="btnDownloadTemplate">
-                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                    </svg>
-                    Download CSV Template
-                  </button>
-                  <button type="button" class="btn btn-outline" id="btnLoadSampleDataset">
-                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                    </svg>
-                    Load Sample Tender Data
-                  </button>
+
+                <!-- 2. Active Loaded Dataset State (Visible AFTER upload) -->
+                <div id="dropZoneActiveState" class="drop-zone-content" style="display: none;">
+                  <div class="active-dataset-card-inner">
+                    <div class="active-dataset-header">
+                      <div class="active-dataset-badge-wrap">
+                        <!-- Professional CSV Document with Verified Badge -->
+                        <div class="active-file-badge">
+                          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Document Sheet -->
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#f8fafc" stroke="#2563eb" stroke-width="1.8" stroke-linejoin="round"/>
+                            <path d="M14 2v6h6" stroke="#2563eb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <!-- Table Grid Lines inside CSV -->
+                            <path d="M8 13h8M8 17h5" stroke="#93c5fd" stroke-width="1.6" stroke-linecap="round"/>
+                            <!-- Refined Verified Check Badge in Corner -->
+                            <circle cx="17.5" cy="17.5" r="4.5" fill="#10b981" stroke="#ffffff" stroke-width="1.5"/>
+                            <path d="M15.5 17.5l1.3 1.3 2.5-2.5" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        </div>
+                        <div class="active-dataset-meta-group">
+                          <div class="active-dataset-title-row">
+                            <span class="active-dataset-label">Active Tender Dataset</span>
+                            <span class="active-status-badge">
+                              <span class="status-pulse-dot"></span>
+                              Verified & Synced
+                            </span>
+                          </div>
+                          <div class="active-dataset-filename" id="activeDatasetFileName">transporter_assignment_data.csv</div>
+                        </div>
+                      </div>
+                      <div class="active-dataset-tags">
+                        <span class="active-format-chip" id="activeDatasetFormatChip">Matrix Grid Format</span>
+                        <span class="active-db-chip">
+                          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                          </svg>
+                          H2 Database
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Mini KPI Summary Strip -->
+                    <div class="active-dataset-stats-strip">
+                      <div class="active-stat-box">
+                        <span class="stat-label">Active Lanes</span>
+                        <span class="stat-number" id="activeDatasetLaneCount">9</span>
+                      </div>
+                      <div class="active-stat-box">
+                        <span class="stat-label">Carriers</span>
+                        <span class="stat-number" id="activeDatasetTransporterCount">7</span>
+                      </div>
+                      <div class="active-stat-box">
+                        <span class="stat-label">Quotations</span>
+                        <span class="stat-number" id="activeDatasetQuoteCount">63</span>
+                      </div>
+                      <div class="active-stat-box">
+                        <span class="stat-label">Average Quote</span>
+                        <span class="stat-number" id="activeDatasetAvgQuote">₹29,151.83</span>
+                      </div>
+                    </div>
+
+                    <!-- Action Buttons: Prominent Replace & Clear -->
+                    <div class="active-dataset-actions">
+                      <button type="button" class="btn btn-primary" id="btnReplaceDataset">
+                        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        Replace Dataset / Upload New CSV
+                      </button>
+                      <button type="button" class="btn btn-outline" id="btnDownloadTemplateActive">
+                        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        Download Template
+                      </button>
+                      <button type="button" class="btn btn-outline btn-unload-dataset" id="btnClearActiveDataset">
+                        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Unload Dataset
+                      </button>
+                    </div>
+
+                    <div class="active-dataset-hint">
+                      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      Drag & drop a new CSV file directly here anytime to safely replace this dataset. You will be prompted to confirm before overwriting.
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -494,7 +1133,7 @@
 
               <!-- Live Parsed Dataset Preview Card -->
               <div id="datasetPreviewCard" style="display: none; margin-top: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 12px;">
                   <div>
                     <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main);" id="datasetPreviewTitle">
                       Dataset Preview
@@ -558,41 +1197,219 @@
               </div>
             </div>
           </div>
+
+          <!-- Modal Dialog: Confirm Dataset Replacement -->
+          <div id="replaceDatasetModal" class="assignment-drawer-backdrop" style="display: none;">
+            <div class="assignment-modal" style="max-width: 580px;">
+              <div class="modal-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #ffffff; margin: 0;">Replace Active Tender Dataset?</h3>
+                    <div style="font-size: 0.8125rem; color: #bfdbfe;">Atomic Database Replacement Confirmation</div>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-sm" id="btnCloseReplaceModal" aria-label="Close">✕ Close</button>
+              </div>
+              <div class="modal-body" style="padding: 24px;">
+                <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius-md); padding: 14px 16px; margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-start;">
+                  <svg width="22" height="22" fill="none" stroke="#d97706" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink: 0; margin-top: 1px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                  </svg>
+                  <div style="font-size: 0.875rem; color: #92400e; line-height: 1.45;">
+                    An active tender dataset is currently loaded. Uploading this new file will <b>atomically replace all lanes and quotations</b> in the database and reset current optimization results.
+                  </div>
+                </div>
+
+                <!-- Comparison Cards -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+                  <!-- Current Dataset -->
+                  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: var(--radius-md); padding: 14px;">
+                    <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 6px;">Currently Active</div>
+                    <div style="font-weight: 700; color: #0f172a; font-size: 0.9375rem; margin-bottom: 8px; word-break: break-all;" id="replaceModalCurrentName">transporter_assignment_data.csv</div>
+                    <div style="font-size: 0.8125rem; color: #475569;" id="replaceModalCurrentStats">9 Lanes • 7 Transporters • 63 Quotes</div>
+                  </div>
+                  <!-- New Dataset -->
+                  <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: var(--radius-md); padding: 14px;">
+                    <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #2563eb; margin-bottom: 6px;">New Replacement</div>
+                    <div style="font-weight: 700; color: #1e40af; font-size: 0.9375rem; margin-bottom: 8px; word-break: break-all;" id="replaceModalNewName">new_dataset.csv</div>
+                    <div style="font-size: 0.8125rem; color: #1e3a8a;" id="replaceModalNewStats">Loading stats...</div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer" style="padding: 16px 24px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 12px;">
+                <button type="button" class="btn btn-outline" id="btnCancelReplace">Keep Current Dataset</button>
+                <button type="button" class="btn btn-primary" id="btnConfirmReplace" style="background: #2563eb; border-color: #2563eb;">
+                  <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                  </svg>
+                  Confirm & Replace Dataset
+                </button>
+              </div>
+            </div>
+          </div>
         </section>
 
         <!-- ==================================================================
              VIEW 6: REPORTS
              ================================================================== -->
         <section id="view-reports" class="view-panel">
-          <div class="enterprise-card">
-            <div class="card-header">
-              <div>
-                <h2 class="card-title">
-                  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                  </svg>
-                  Procurement Reports & Analytics
-                </h2>
-                <div class="card-subtitle">Audit-ready procurement summaries and carrier allocation reports.</div>
-              </div>
+          
+          <!-- Empty State (When no optimization results) -->
+          <div class="empty-state-card" id="reportsEmptyState">
+            <div class="empty-state-icon-wrapper">
+              <svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
             </div>
-            <div class="card-body">
-              <div class="empty-state-card">
-                <div class="empty-state-icon-wrapper">
-                  <svg width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                  </svg>
-                </div>
-                <h3 class="empty-state-title">No Reports Available Yet</h3>
-                <p class="empty-state-desc">
-                  Procurement reports and cost distribution metrics will be generated once assignments are finalized.
-                </p>
-                <div class="empty-state-actions">
-                  <button class="btn btn-primary" onclick="appRouter.navigate('dataset')">Upload Dataset</button>
-                </div>
-              </div>
+            <h3 class="empty-state-title">No Reports Available Yet</h3>
+            <p class="empty-state-desc">
+              Procurement audit reports and carrier expenditure analysis will be compiled after assignments are finalized.
+            </p>
+            <div class="empty-state-actions">
+              <button class="btn btn-primary" onclick="appRouter.navigate('optimization')">
+                Run Optimization First
+              </button>
             </div>
           </div>
+
+          <!-- Reports Content (When optimized) -->
+          <div id="reportsContentWrapper" style="display: none;">
+            
+            <!-- Official Report Header for Print / PDF Export (Only rendered in Print/PDF) -->
+            <div class="report-print-header">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                  <img src="images/delivery.png" alt="FreightFox Logo" style="width: 44px; height: 44px; object-fit: contain;">
+                  <div>
+                    <div style="font-size: 1.4rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">FREIGHTFOX LOGISTICS</div>
+                    <div style="font-size: 0.95rem; font-weight: 700; color: #0284c7;">PROCUREMENT TENDER ALLOCATION AUDIT REPORT</div>
+                  </div>
+                </div>
+                <div style="text-align: right; font-size: 8pt; color: #475569;">
+                  <div><b>Generated:</b> <span id="reportPrintTimestamp">—</span></div>
+                  <div><b>Engine:</b> Bitmask DP O(L·2^T·T)</div>
+                  <div><b>Status:</b> Optimal Lexicographic Solution</div>
+                </div>
+              </div>
+              <div style="font-size: 8pt; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 6px;">
+                Tender Source: <b id="reportPrintDatasetName">Active Tender Dataset</b> | Total Corridors: <b id="reportPrintLanesCount">9 Lanes</b> | Carrier Limit: <b>3 Transporters Max</b>
+              </div>
+            </div>
+
+            <!-- Executive Summary Header with Print Action -->
+            <div class="enterprise-card" style="margin-bottom: 24px;">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Procurement Audit & Executive Analytics
+                  </h2>
+                  <div class="card-subtitle">Official allocation statement and financial audit report.</div>
+                </div>
+                <div class="workspace-actions">
+                  <button type="button" class="btn btn-outline btn-sm" onclick="reportsManager.exportCSV()">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Download Report (CSV)
+                  </button>
+                  <button type="button" class="btn btn-primary btn-sm" onclick="reportsManager.printReport()">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    Print / Export PDF
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                
+                <div class="kpi-grid" style="margin-bottom: 24px;">
+                  <div class="kpi-card">
+                    <div class="kpi-label">Total Freight Procurement</div>
+                    <div class="kpi-value" style="color: var(--primary-600);" id="reportTotalSpend">₹0.00</div>
+                    <div class="kpi-subtext">Optimal procurement expenditure</div>
+                  </div>
+                  <div class="kpi-card">
+                    <div class="kpi-label">Baseline Ceiling (Max Quote)</div>
+                    <div class="kpi-value" id="reportBaselineCost">₹0.00</div>
+                    <div class="kpi-subtext">Cost without optimization</div>
+                  </div>
+                  <div class="kpi-card">
+                    <div class="kpi-label">Total Cost Savings</div>
+                    <div class="kpi-value" style="color: var(--emerald-600);" id="reportCostSavings">₹0.00</div>
+                    <div class="kpi-subtext" id="reportSavingsPercent">0.0% procurement reduction</div>
+                  </div>
+                  <div class="kpi-card">
+                    <div class="kpi-label">Carriers Utilized</div>
+                    <div class="kpi-value" id="reportCarriersCount">0</div>
+                    <div class="kpi-subtext">Within operational limits</div>
+                  </div>
+                </div>
+
+                <!-- Carrier Spend Distribution Table -->
+                <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 12px;">
+                  Carrier Expenditure Allocation
+                </h3>
+                <div class="table-responsive" style="margin-bottom: 24px;">
+                  <table class="enterprise-table">
+                    <thead>
+                      <tr>
+                        <th>Transporter</th>
+                        <th>Assigned Lanes</th>
+                        <th>Total Spend (INR)</th>
+                        <th>Spend Share (%)</th>
+                        <th class="hide-in-print" style="min-width: 140px;">Distribution</th>
+                      </tr>
+                    </thead>
+                    <tbody id="reportCarrierTableBody"></tbody>
+                  </table>
+                </div>
+
+                <!-- Complete Allocation Statement -->
+                <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 12px;">
+                  Lane-by-Lane Allocation Audit
+                </h3>
+                <div class="table-responsive">
+                  <table class="enterprise-table">
+                    <thead>
+                      <tr>
+                        <th>Lane ID</th>
+                        <th>Origin Corridor</th>
+                        <th>Destination</th>
+                        <th>Allocated Carrier</th>
+                        <th>Winning Bid Rate</th>
+                      </tr>
+                    </thead>
+                    <tbody id="reportLanesTableBody"></tbody>
+                  </table>
+                </div>
+
+                <!-- Executive Audit Sign-off for Compliance & Records (Rendered in Print/PDF) -->
+                <div class="report-signoff-grid">
+                  <div class="report-signoff-box">
+                    <div class="signoff-line"></div>
+                    <div class="signoff-label">Prepared By: Freight Operations Lead</div>
+                    <div style="font-size: 7.5pt; color: #64748b;">Logistics Execution & Tender Ingestion</div>
+                  </div>
+                  <div class="report-signoff-box">
+                    <div class="signoff-line"></div>
+                    <div class="signoff-label">Approved By: Head of Supply Chain & Procurement</div>
+                    <div style="font-size: 7.5pt; color: #64748b;">Enterprise Rate Authorization & Audit Approval</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
         </section>
 
       </main>
@@ -600,12 +1417,32 @@
 
   </div>
 
+  <!-- ====================================================================
+       GLOBAL TRUCK LOADER & TRANSITION OVERLAY (Lottie Motion)
+       ==================================================================== -->
+  <div id="appGlobalLoader" class="app-global-loader">
+    <div class="loader-card">
+      <div id="truckLoaderAnimation" class="truck-animation-container"></div>
+      <div class="loader-title" id="loaderTitleText">FreightFox Logistics</div>
+      <div class="loader-subtitle" id="loaderSubtitleText">
+        <span class="loader-pulse-dot"></span>
+        <span id="loaderSubtitleDetail">Synchronizing operational workspace...</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Leaflet 1.9.4 JavaScript -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
+  <!-- Lottie Web Animation Engine & Truck Loader Asset -->
+  <script src="js/lottie.min.js"></script>
+  <script src="js/truck-loader-data.js"></script>
+
   <!-- Core Application Scripts -->
-  <script src="/js/dataset-parser.js"></script>
-  <script src="/js/app.js"></script>
+  <script src="js/dataset-parser.js"></script>
+  <script src="js/geo-routing.js"></script>
+  <script src="js/map-engine.js"></script>
+  <script src="js/app.js?v=2.9"></script>
 
 </body>
 </html>

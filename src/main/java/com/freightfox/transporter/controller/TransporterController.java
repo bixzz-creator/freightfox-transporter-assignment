@@ -2,9 +2,7 @@ package com.freightfox.transporter.controller;
 
 import com.freightfox.transporter.dto.request.AssignmentRequest;
 import com.freightfox.transporter.dto.request.InputRequest;
-import com.freightfox.transporter.dto.response.AssignmentResponse;
-import com.freightfox.transporter.dto.response.ErrorResponse;
-import com.freightfox.transporter.dto.response.InputResponse;
+import com.freightfox.transporter.dto.response.*;
 import com.freightfox.transporter.service.TransporterService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/v1/transporters")
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE, RequestMethod.OPTIONS})
 @Tag(name = "Transporter Assignment", description = "Endpoints for lane & quotation ingestion and assignment optimization")
 public class TransporterController {
 
@@ -275,5 +274,83 @@ public class TransporterController {
 
         AssignmentResponse response = transporterService.generateAssignment(request.getMaxTransporters());
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/current")
+    @Operation(
+            summary = "Get current active tender dataset",
+            description = "Retrieves the active lanes, transporters, and quotations currently persisted in the database."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Active dataset successfully retrieved",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = CurrentDatasetResponse.class))
+            )
+    })
+    public ResponseEntity<CurrentDatasetResponse> getCurrentDataset() {
+        log.info("GET /api/v1/transporters/current");
+        CurrentDatasetResponse response = transporterService.getCurrentDataset();
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping
+    @Operation(
+            summary = "Atomically unload and clear tender dataset",
+            description = "Clears all lanes, transporters, and quotations from the database atomically."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Dataset successfully cleared",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = DeleteResponse.class))
+            )
+    })
+    public ResponseEntity<DeleteResponse> clearDataset() {
+        log.info("DELETE /api/v1/transporters");
+        DeleteResponse response = transporterService.clearAllData();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/status")
+    @Operation(
+            summary = "Get system runtime status and operator diagnostics",
+            description = "Returns real-time service health, database state, algorithm specifications, and operator session details."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "System status retrieved",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = SystemStatusResponse.class))
+            )
+    })
+    public ResponseEntity<SystemStatusResponse> getSystemStatus() {
+        log.info("GET /api/v1/transporters/status");
+        SystemStatusResponse response = transporterService.getSystemStatus();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/assignment/latest")
+    @Operation(
+            summary = "Get latest optimal assignment solution",
+            description = "Retrieves the most recently computed optimal assignment result."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Latest assignment solution retrieved",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = AssignmentResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "No assignment solution currently computed",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
+    public ResponseEntity<AssignmentResponse> getLatestAssignment() {
+        log.info("GET /api/v1/transporters/assignment/latest");
+        return transporterService.getLatestAssignment()
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 }

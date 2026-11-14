@@ -62,4 +62,3 @@ class ActuatorAndSwaggerIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 }
-

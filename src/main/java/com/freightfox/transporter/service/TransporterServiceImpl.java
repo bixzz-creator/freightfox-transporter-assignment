@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,6 +43,7 @@ public class TransporterServiceImpl implements TransporterService {
     private final LaneQuoteRepository laneQuoteRepository;
     private final AssignmentOptimizer optimizer;
     private final int maxSupportedTransporters;
+    private volatile AssignmentResponse latestAssignment;
 
     public TransporterServiceImpl(LaneRepository laneRepository,
                                   TransporterRepository transporterRepository,
@@ -67,6 +70,7 @@ public class TransporterServiceImpl implements TransporterService {
         laneQuoteRepository.deleteAllInBatch();
         transporterRepository.deleteAllInBatch();
         laneRepository.deleteAllInBatch();
+        this.latestAssignment = null;
 
         // Step 3: Save lanes
         Map<Long, Lane> laneMap = new LinkedHashMap<>();
@@ -199,7 +203,131 @@ public class TransporterServiceImpl implements TransporterService {
         response.setAssignedLanes(assignmentDetails.size());
         response.setTransporterCount(selectedTransporters.size());
 
+        this.latestAssignment = response;
         return response;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CurrentDatasetResponse getCurrentDataset() {
+        List<Lane> lanes = laneRepository.findAll();
+        List<Transporter> transporters = transporterRepository.findAll();
+        List<LaneQuote> quotes = laneQuoteRepository.findAllWithLaneAndTransporter();
+
+        if (lanes.isEmpty() || transporters.isEmpty()) {
+            return CurrentDatasetResponse.empty();
+        }
+
+        // Map lanes sorted by ID
+        List<LaneDto> laneDtos = lanes.stream()
+                .sorted(Comparator.comparingLong(Lane::getId))
+                .map(l -> new LaneDto(l.getId(), l.getOrigin(), l.getDestination()))
+                .toList();
+
+        // Group quotes by transporter ID
+        Map<Long, List<LaneQuoteDto>> quotesByTransporter = quotes.stream()
+                .collect(Collectors.groupingBy(
+                        q -> q.getTransporter().getId(),
+                        Collectors.mapping(
+                                q -> new LaneQuoteDto(q.getLane().getId(), q.getQuoteAmount()),
+                                Collectors.toList()
+                        )
+                ));
+
+        // Map transporters sorted by ID
+        List<TransporterDto> transporterDtos = transporters.stream()
+                .sorted(Comparator.comparingLong(Transporter::getId))
+                .map(t -> {
+                    List<LaneQuoteDto> tQuotes = quotesByTransporter.getOrDefault(t.getId(), Collections.emptyList());
+                    return new TransporterDto(t.getId(), t.getName(), tQuotes);
+                })
+                .toList();
+
+        // Calculate quote statistics
+        BigDecimal sum = BigDecimal.ZERO;
+        BigDecimal min = null;
+        BigDecimal max = null;
+        for (LaneQuote q : quotes) {
+            BigDecimal amt = q.getQuoteAmount();
+            sum = sum.add(amt);
+            if (min == null || amt.compareTo(min) < 0) min = amt;
+            if (max == null || amt.compareTo(max) > 0) max = amt;
+        }
+
+        BigDecimal avg = quotes.isEmpty() ? BigDecimal.ZERO :
+                sum.divide(BigDecimal.valueOf(quotes.size()), 2, RoundingMode.HALF_UP);
+
+        return new CurrentDatasetResponse(
+                "LOADED",
+                laneDtos.size(),
+                transporterDtos.size(),
+                quotes.size(),
+                avg,
+                min != null ? min : BigDecimal.ZERO,
+                max != null ? max : BigDecimal.ZERO,
+                laneDtos,
+                transporterDtos,
+                "Active tender dataset loaded from database."
+        );
+    }
+
+    @Override
+    @Transactional
+    public DeleteResponse clearAllData() {
+        log.info("Atomically clearing all lanes, transporters, and quotes from database");
+        laneQuoteRepository.deleteAllInBatch();
+        transporterRepository.deleteAllInBatch();
+        laneRepository.deleteAllInBatch();
+        this.latestAssignment = null;
+
+        return new DeleteResponse(
+                "SUCCESS",
+                "Tender dataset unloaded and database cleared atomically.",
+                Instant.now()
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public SystemStatusResponse getSystemStatus() {
+        long lanesCount = laneRepository.count();
+        long transportersCount = transporterRepository.count();
+        long quotesCount = laneQuoteRepository.count();
+        boolean loaded = lanesCount > 0 && transportersCount > 0;
+
+        Map<String, Object> activeDataset = new LinkedHashMap<>();
+        activeDataset.put("loaded", loaded);
+        activeDataset.put("lanesCount", lanesCount);
+        activeDataset.put("transportersCount", transportersCount);
+        activeDataset.put("quotesCount", quotesCount);
+        activeDataset.put("hasAssignment", latestAssignment != null);
+
+        Map<String, Object> operator = new LinkedHashMap<>();
+        operator.put("username", "logistics_ops_lead");
+        operator.put("displayName", "Logistics Ops");
+        operator.put("role", "Freight Operations Lead");
+        operator.put("department", "Supply Chain & Logistics Execution");
+        operator.put("permissions", List.of("TENDER_INGEST", "SOLVE_OPTIMIZATION", "EXPORT_AUDIT_REPORT", "RESET_WORKSPACE"));
+
+        return new SystemStatusResponse(
+                "UP",
+                "FreightFox Transporter Optimization Service",
+                "1.0.0",
+                "local",
+                8081,
+                "H2 In-Memory (jdbc:h2:mem:freightfox_db)",
+                "CONNECTED",
+                "Bitmask Dynamic Programming O(L·2^T·T)",
+                maxSupportedTransporters,
+                activeDataset,
+                operator,
+                Instant.now()
+        );
+    }
+
+    @Override
+    public Optional<AssignmentResponse> getLatestAssignment() {
+        return Optional.ofNullable(this.latestAssignment);
     }
 
     // ===================== Validation Methods =====================

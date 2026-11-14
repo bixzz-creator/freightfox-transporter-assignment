@@ -151,5 +151,48 @@ class TransporterServiceImplTest {
         assertEquals(10L, response.getSelectedTransporters().get(0).getTransporterId());
         assertEquals("Apex Freight", response.getSelectedTransporters().get(0).getTransporterName());
     }
+
+    @Test
+    @DisplayName("getCurrentDataset returns EMPTY when no data exists")
+    void testGetCurrentDatasetEmpty() {
+        when(laneRepository.findAll()).thenReturn(Collections.emptyList());
+        when(transporterRepository.findAll()).thenReturn(Collections.emptyList());
+        when(laneQuoteRepository.findAllWithLaneAndTransporter()).thenReturn(Collections.emptyList());
+
+        var result = transporterService.getCurrentDataset();
+        assertNotNull(result);
+        assertEquals("EMPTY", result.getStatus());
+        assertEquals(0, result.getLanesCount());
+        assertEquals(0, result.getTransportersCount());
+    }
+
+    @Test
+    @DisplayName("clearAllData deletes all repository batches and clears latest assignment")
+    void testClearAllData() {
+        var result = transporterService.clearAllData();
+        assertNotNull(result);
+        assertEquals("SUCCESS", result.getStatus());
+
+        verify(laneQuoteRepository).deleteAllInBatch();
+        verify(transporterRepository).deleteAllInBatch();
+        verify(laneRepository).deleteAllInBatch();
+        assertTrue(transporterService.getLatestAssignment().isEmpty());
+    }
+
+    @Test
+    @DisplayName("getSystemStatus returns dynamic platform diagnostic metadata")
+    void testGetSystemStatus() {
+        when(laneRepository.count()).thenReturn(5L);
+        when(transporterRepository.count()).thenReturn(3L);
+        when(laneQuoteRepository.count()).thenReturn(15L);
+
+        var status = transporterService.getSystemStatus();
+        assertNotNull(status);
+        assertEquals("UP", status.getStatus());
+        assertEquals(8081, status.getPort());
+        assertEquals("CONNECTED", status.getDatabaseStatus());
+        assertEquals(5L, status.getActiveDataset().get("lanesCount"));
+        assertEquals("Freight Operations Lead", status.getOperator().get("role"));
+    }
 }
 
