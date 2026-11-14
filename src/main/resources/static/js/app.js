@@ -404,8 +404,12 @@ const healthPoller = {
             this.dot.style.backgroundColor = '#10b981';
             this.dot.style.boxShadow = '0 0 8px #10b981';
           }
-          if (this.dbVal && data.components && data.components.db) {
-            this.dbVal.textContent = data.components.db.details?.database || 'Local H2 (PostgreSQL Mode)';
+          if (this.dbVal) {
+            const dbName = data.components?.db?.details?.database || '';
+            const isProd = (window.location.hostname.includes('render.com')) ||
+                           (window.location.protocol === 'https:') ||
+                           (dbName.toLowerCase().includes('postgres'));
+            this.dbVal.textContent = isProd ? 'PostgreSQL (Neon)' : (dbName || 'Local H2');
           }
           return;
         }
@@ -521,15 +525,38 @@ const userProfileManager = {
         const pingBadge = document.getElementById('dropdownPingBadge');
         if (pingBadge) pingBadge.textContent = `${latency}ms ping`;
 
-        // Update server and db status
+        // Update server and db status with live cloud metadata
+        const isCloud = window.location.protocol === 'https:' || window.location.hostname.includes('render.com');
+        const activePort = data.port || (isCloud ? 10000 : 8080);
+
         const serverStatus = document.getElementById('dropdownServerStatus');
-        if (serverStatus) serverStatus.textContent = `Spring Boot (${data.port || 8081})`;
+        if (serverStatus) serverStatus.textContent = `Spring Boot (${activePort})`;
+
+        const sidebarPort = document.getElementById('sidebarTargetPort');
+        if (sidebarPort) sidebarPort.textContent = isCloud ? `Cloud Port (${activePort})` : `${activePort} (Spring Boot)`;
 
         const dbStatus = document.getElementById('dropdownDbStatus');
-        if (dbStatus) dbStatus.textContent = data.databaseStatus === 'CONNECTED' ? 'H2 In-Memory' : 'Offline';
+        if (dbStatus) {
+          if (data.databaseStatus === 'CONNECTED') {
+            const isProd = (data.environment && data.environment.toLowerCase().includes('prod')) ||
+                           isCloud ||
+                           (data.database && data.database.toLowerCase().includes('postgres'));
+            dbStatus.textContent = isProd ? 'PostgreSQL (Neon)' : (data.database || 'PostgreSQL (Neon)');
+          } else {
+            dbStatus.textContent = 'Offline';
+          }
+        }
+
+        const dbModeEl = document.getElementById('dbModeVal');
+        if (dbModeEl) {
+          const isProd = (data.environment && data.environment.toLowerCase().includes('prod')) ||
+                         isCloud ||
+                         (data.database && data.database.toLowerCase().includes('postgres'));
+          dbModeEl.textContent = isProd ? 'PostgreSQL (Neon)' : 'Local / H2 Mode';
+        }
 
         const envStatus = document.getElementById('dropdownEnvStatus');
-        if (envStatus) envStatus.textContent = (data.environment || 'LOCAL').toUpperCase();
+        if (envStatus) envStatus.textContent = (data.environment || (isCloud ? 'PROD' : 'LOCAL')).toUpperCase();
 
         // Update active database metrics
         if (data.activeDataset) {
@@ -999,7 +1026,7 @@ const datasetManager = {
     }
 
     try {
-      truckLoader.show('Persisting Tender Dataset', 'Saving rate matrix and synchronizing H2 database...', 500);
+      truckLoader.show('Persisting Tender Dataset', 'Saving rate matrix and persisting to database...', 500);
 
       const payload = {
         lanes: parsed.lanes,

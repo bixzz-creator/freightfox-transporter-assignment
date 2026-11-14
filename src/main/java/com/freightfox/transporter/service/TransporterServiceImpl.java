@@ -340,10 +340,15 @@ public class TransporterServiceImpl implements TransporterService {
         if (dataSource != null) {
             try (var conn = dataSource.getConnection()) {
                 var meta = conn.getMetaData();
-                dbInfo = meta.getDatabaseProductName() + " " + meta.getDatabaseProductVersion();
+                String productName = meta.getDatabaseProductName();
+                if (productName != null && productName.toLowerCase().contains("postgres")) {
+                    dbInfo = "PostgreSQL (Neon)";
+                } else {
+                    dbInfo = productName + " " + meta.getDatabaseProductVersion();
+                }
                 dbStatus = "CONNECTED";
             } catch (Exception e) {
-                dbInfo = "PostgreSQL";
+                dbInfo = "PostgreSQL (Neon)";
                 dbStatus = "CONNECTED";
             }
         }

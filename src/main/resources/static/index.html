@@ -47,7 +47,7 @@
 
       <div class="header-right">
         <!-- Live System Health Status Indicator (Actuator Polled) -->
-        <div class="system-health-pill" id="healthPill" title="Connected to Spring Boot Service on port 8081">
+        <div class="system-health-pill" id="healthPill" title="Connected to Live Spring Boot Microservice">
           <span class="health-dot" id="healthDot"></span>
           <span id="healthText">System Online</span>
         </div>
@@ -73,7 +73,7 @@
           <button type="button" class="user-profile-btn" id="userProfileBtn" aria-expanded="false" aria-haspopup="true" title="System Diagnostics & Operator Profile">
             <div class="user-avatar-badge">
               <span>FF</span>
-              <span class="user-status-dot online" id="headerSystemStatusDot" title="System: Online (Spring Boot 8081)"></span>
+              <span class="user-status-dot online" id="headerSystemStatusDot" title="System: Online (Live Spring Boot Microservice)"></span>
             </div>
             <div class="user-info">
               <span class="user-name" id="headerOperatorName">Logistics Ops</span>
@@ -107,15 +107,15 @@
               <div class="profile-status-grid">
                 <div class="profile-status-item">
                   <span class="status-label">Server</span>
-                  <span class="status-val" id="dropdownServerStatus">Spring Boot (8081)</span>
+                  <span class="status-val" id="dropdownServerStatus">Spring Boot (10000)</span>
                 </div>
                 <div class="profile-status-item">
                   <span class="status-label">Database</span>
-                  <span class="status-val" id="dropdownDbStatus">H2 In-Memory</span>
+                  <span class="status-val" id="dropdownDbStatus">PostgreSQL (Neon)</span>
                 </div>
                 <div class="profile-status-item">
                   <span class="status-label">Environment</span>
-                  <span class="status-val" id="dropdownEnvStatus">Local Mode</span>
+                  <span class="status-val" id="dropdownEnvStatus">PROD</span>
                 </div>
                 <div class="profile-status-item">
                   <span class="status-label">Solver Engine</span>
@@ -309,11 +309,11 @@
             </div>
             <div class="spec-row">
               <span class="spec-label">Target Port</span>
-              <span class="spec-val">8081 (Spring Boot)</span>
+              <span class="spec-val" id="sidebarTargetPort">Cloud Port (10000)</span>
             </div>
             <div class="spec-row">
               <span class="spec-label">Environment</span>
-              <span class="spec-val" id="dbModeVal">Local / H2 Mode</span>
+              <span class="spec-val" id="dbModeVal">PostgreSQL (Neon)</span>
             </div>
           </div>
         </div>
